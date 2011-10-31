@@ -1,5 +1,5 @@
 -- SEQUENCE DETECTOR
--- seqDet.vhd
+-- DTMF_SeqDet.vhd
 --
 -- Code detector for authenticating user :
 -- 'unlocks' access to menu when given a certain
@@ -17,7 +17,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-Entity seqDet is
+Entity DTMF_SeqDet is
 	port( 
 	 -- Clock
 	 clk                   : in  std_logic;
@@ -32,7 +32,7 @@ Entity seqDet is
 	);
 End Entity;
 
-Architecture seqDet_bhv of seqDet is
+Architecture DTMF_SeqDet_bhv of DTMF_SeqDet is
 
 	-- States
 	type state_type is (S0, S1, S2, S3, UL);
