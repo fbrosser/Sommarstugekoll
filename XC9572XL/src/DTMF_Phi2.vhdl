@@ -17,22 +17,22 @@ use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
 Entity DTMF_Phi2 is
-	port( 
+	port(
 	 -- Clock
 	 clk			: in  std_logic;
 	 -- Asynchronous reset
 	 rst			: in  std_logic;
 	 -- Clock Enable
-	 ce          		: in  std_logic;);
+	 ce    : in  std_logic;
 	 -- Output signal to MT8880
-	 phi2			: out std_logic
+	 phi2		: out std_logic
 	);
 End Entity;
 
 Architecture DTMF_Phi2_bhv of DTMF_Phi2 is
 
 	-- States
-	type state_type is ();
+	type state_type is (S0, S1, S2, S3, S4, S5, S6);
 
 	-- Current state
 	signal state : state_type;
@@ -46,7 +46,7 @@ Architecture DTMF_Phi2_bhv of DTMF_Phi2 is
 	end process;
 
 	-- Combinatorial Process
-	COMB_P: process(state, input)
+	COMB_P: process(state)
 
 	begin
 
