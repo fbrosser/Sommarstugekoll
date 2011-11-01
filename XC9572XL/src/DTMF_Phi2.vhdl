@@ -8,7 +8,7 @@
 -- Sommarstugekoll, EDA234
 --
 -- @author Fredrik Brosser
--- @date 2011-10-31 17:34
+-- @date 2011-10-31
 --
 
 library ieee;
