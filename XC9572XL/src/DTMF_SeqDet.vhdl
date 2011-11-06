@@ -1,4 +1,6 @@
--- SEQUENCE DETECTOR
+----------------------------------------------------------------------------------
+-- Sequence Detector
+--
 -- DTMF_SeqDet.vhd
 --
 -- Code detector for authenticating user :
@@ -8,9 +10,8 @@
 -- 
 -- Sommarstugekoll, EDA234
 --
--- @author Fredrik Brosser
 -- @date 2011-10-27
---
+----------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;

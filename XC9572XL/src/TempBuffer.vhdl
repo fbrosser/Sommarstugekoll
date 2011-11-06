@@ -1,3 +1,6 @@
+----------------------------------------------------------------------------------
+-- Temperature Buffer and MUX
+--
 -- TempBuffer.vhdl
 --
 -- Buffer and MUX for serial communication with
@@ -5,9 +8,8 @@
 -- 
 -- Sommarstugekoll, EDA234
 --
--- @author Fredrik Brosser
 -- @date 2011-11-01
---
+----------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
