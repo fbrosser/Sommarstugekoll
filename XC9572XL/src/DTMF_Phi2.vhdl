@@ -32,21 +32,21 @@ End Entity;
 Architecture DTMF_Phi2_bhv of DTMF_Phi2 is
 
 	-- States
-	type state_type is (S0, S1, S2, S3, S4, S5, S6);
+	type stateType is (S0, S1, S2, S3, S4, S5, S6);
 
 	-- Current state
-	signal state : state_type;
-	signal next_state : state_type;
+	signal state : stateType;
+	signal nextState : stateType;
 
 	begin  
 	-- Synchronous process: state changes
-	ASM_P: process(clk, rst)
+	SyncP: process(clk, rst)
 	begin
 
 	end process;
 
 	-- Combinatorial Process
-	COMB_P: process(state)
+	CombP: process(state)
 
 	begin
 

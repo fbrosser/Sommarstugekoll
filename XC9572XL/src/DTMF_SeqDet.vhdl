@@ -36,10 +36,10 @@ End Entity;
 Architecture DTMF_SeqDet_bhv of DTMF_SeqDet is
 
 	-- States
-	type state_type is (S0, S1, S2, S3, UL);
+	type stateType is (S0, S1, S2, S3, UL);
 	-- Current state
-	signal state : state_type;
-	signal next_state : state_type;
+	signal state : stateType;
+	signal nextState : stateType;
 
 	-- 'Secret' code 1234
 	constant code0 : std_logic_vector := "0001";
@@ -49,7 +49,7 @@ Architecture DTMF_SeqDet_bhv of DTMF_SeqDet is
 
 	begin  
 	-- Synchronous process: state changes
-	ASM_P: process(clk, rst)
+	SyncP: process(clk, rst)
 	begin
 		-- Asynchronous reset, active high
 		if (rst = '1') then
@@ -57,40 +57,40 @@ Architecture DTMF_SeqDet_bhv of DTMF_SeqDet is
 		else
 		 -- Trigger on positive clock flank
 			 if (clk'Event and clk = '1' and ce = '1') then
-			  	state <= next_state;
+			  	state <= nextState;
 			end if;
 		end if;
 
 	end process;
 
 	-- Combinatorial Process
-	COMB_P: process(state, input)
+	CombP: process(state, input)
 	begin
 		-- Assign default values
 		lock <= '1';
-		next_state <= S0;
+		nextState <= S0;
 
 		case state is
 			when S0 =>
 				if (input = code0) then
-					next_state <= S1;
+					nextState <= S1;
 				end if;
 			when S1 =>
 				if (input = code1) then
-				   	next_state <= S2;
+				   	nextState <= S2;
 				end if;
 			when S2 =>
 			 	if (input = code2) then
-			     		next_state <= S3;
+			     		nextState <= S3;
 			   	end if;
 		 	when S3 =>
 				if (input = code3) then
-			     		next_state <= UL;
+			     		nextState <= UL;
 			     		lock <= '0';
 			   	end if;
 		 	-- Unlocked!
 		 	when UL =>
-		     		next_state <= S0;
+		     		nextState <= S0;
 		     		lock <= '0';
 		end case;
 

@@ -15,12 +15,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 Entity SPI is
     Port ( data 	: in  	STD_LOGIC_VECTOR (3 downto 0);
-           clk 	: in  	STD_LOGIC;
+           clk 		: in  	STD_LOGIC;
            reset 	: in  	STD_LOGIC;
-           sck 	: out  	STD_LOGIC;
-           sdi 	: out  	STD_LOGIC;
-           cs 		: out  	STD_LOGIC;
-           oe 		: out  	STD_LOGIC);
+           sck 		: out  STD_LOGIC;
+           sdi 		: out  STD_LOGIC;
+           cs 		: out  STD_LOGIC;
+           oe 		: out  STD_LOGIC);
 End Entity;
 
 Architecture SPI_bhv of SPI is
