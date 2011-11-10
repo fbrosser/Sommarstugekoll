@@ -29,5 +29,21 @@ begin
   -- Select input B
   Q <= B when (sel = '0' and E = '1') else 'Z';
   -- Pull-up resistor
-  Q <= 'H';          
+  Q <= 'H'; 
+  
+--  P : process(sel, A, B)
+--  begin
+--  	-- Default: High impedance
+--  	Q <= 'Z';
+--  	-- Strong drive on bus
+--  	if(sel = '1' and E = '1') then
+--  		Q <= A;
+--  	elsif(sel = '1' and E = '1') then
+--  		Q <= B
+--  	-- 4k7 Pull-up resistor to Vcc
+--  	else 
+--  		Q <= 'H';
+--  	end if;
+--  end process;      
+     
 End Architecture;
