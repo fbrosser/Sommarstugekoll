@@ -51,13 +51,32 @@
 	
 		\subsubsection{Sound Module and ISD2560P}
 
-		\subsubsection{Temperature Modul and DS18S20}
+		\subsubsection{Temperature Module and DS18S20}
+			The temperature module of the CPLD is tasked with handling the serial communication with
+			the DS18S20 Temperature sensors via the 1-Wire buses, and outputting the read temperatures
+			to the sound module. 
+
+			A read cycle consists of three stages, Initialization, Command issuing and Reading of data.
+			Initialization is performed by pulling the bus low for 512 µs, then releasing the bus. The
+			temperature sensor responds with a presence pulse by pulling the bus low for 106 µs, confirming
+			its presence on the bus and its operational status. 
+
+			Detecting the presence pulse, the master starts to issue a ROM Command (Skip ROM, 0xCC), followed
+			by a short recovery time and then a Function Command (Convert Temperature, 0x44).
+			The master then resets the temperature sensor as above, then sends another pair of ROM-Function 
+			command, 0xCC and then 0xBE (Read Scratchpad).
+
+			Ideally, the DS18S20 should now be ready to transmit the data stored on its on-chip memory of
+			9 bytes.
 
 		\subsubsection{Control Functions}
 
 		\subsubsection{Interface}
 
 \section{State Machines}
+		\subsubsection{DS18S20 Serial Communication}
+		\subsubsection{MT8880}
+		\subsubsection{ISD2560P}
 
 \section{Timing Diagrams}
 
