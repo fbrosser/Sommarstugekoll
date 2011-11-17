@@ -33,6 +33,7 @@
 *.ta
 *.tcl
 *.tlg
+*.toc
 *.txt
 *.ucf
 *.vif
