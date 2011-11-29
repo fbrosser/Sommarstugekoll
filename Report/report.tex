@@ -9,7 +9,7 @@
 \usepackage{color}
 
 % Swedish
-% \usepackage[swedish]{babel}
+\usepackage[swedish]{babel}
 
 % Table of contents depth 3 levels: A.B.C
 \setcounter{tocdepth}{3}
@@ -17,9 +17,9 @@
 \begin{document}
 
 \title{Sommarstugekoll \\
-	Digital Konstruktion EDA234 \\ Group 2}
+	Digital Konstruktion EDA234 \\ Grupp 2}
 \author{Names \\
-   Chalmers University of Technology \\
+   Chalmers Tekniska Högskola \\
    \texttt{email addresses}}
 
 \maketitle
@@ -31,36 +31,38 @@
 \pagebreak
 
 \begin{abstract}
-	The system described in this report is a an automated temperature control system, accessible and controllable
-	via phone (DTMF). The main functionality of the system is to inform the user of the current temperature(s) of the 
-	locations where the temperature sensors are placed, as well as giving the option of controlling (switching on/off)
-	a number of external functions, such as space heaters and radiators. The information and control data is exchanged
-	via a regular analog phone line, using DTMF; Dual Tone Multiple Frequency.
 
-	One particular practical example of useage would be controlling the heating in a personal summer house; it would be
-	undesireable for the pipes (among other things) to freeze during winter or other times when the occupants are not
-	there, but at the same time the owner wishes to keep heating costs to a minimum.
-	'Sommarstugekoll' solves this problem by offering an easy way to keep track and control of the in- and outdoor temperatures.
-	In case the occupant wants to visit his summer house, he simply dials the number and tells the system to switch on 
-	the radiators, giving the heating systems time to heat the house to a comfortable temperature while he makes the drive.
+	Systemet som beskrivs i denna rapport är ett automatiserat temperaturkontrollsystem som är åtkomstbart och styrbart via
+	telefon (DTMF). Systemets huvudfunktionalitet är att informera användaren om de aktuella temperaturerna som läses från
+	två anslutna temperatursensorer, och att ge användaren möjlighet att på avstånd styra (av/på) ett antal externa funktioner,
+	såsom exempelvis värmeelement. Information och kontrolldata utbytes genom en vanlig analog telefonlinje, med hjälp av DTMF:
+	Dual Tone Multiple Frequency. 
 
-	The system itself requires only a phone line and a standard power supply of 5V. Being power efficient, the system can stay
-	switched on for long periods of time, making it an easy and neat solution for all your domestic heating control needs.
+	Ett särskilt exempel på användningsområde är kontroll av uppvärmningen i en sommarstuga. Med hjälp av systemet kan man
+	undvika att temperaturen sjunker under en viss gräns, vilket skulle kunna få konsekvenser såsom att rör fryser. Genom att
+	hålla temperaturen på en lämplig nivå kan man undvika oönskade konsekvenser samtidigt som man minimerar uppvärmningskostnader.
+	'Sommarstugekoll' löser detta problem genom att erbjuda ett enkelt sätt att hålla koll på och kontrollera inom- och utomhustemperaturer.
+	Om ägaren till en sommarstuga vill göra ett besök ringer han/hon helt enkelt upp sommarstugan och slår på lämpliga element, så att
+	sommarstugan hinner värmas till en behaglig temperatur medans ägaren kör dit.
+
+	Systemet självt kräver endast en telefonlinje och en vanlig spänningskälla på 5V. Eftersom det är effektsnålt kan systemet stå
+	på under långa perioder, vilket gör det en lätt och trevlig lösning på alla dina sommarstugeuppvärmningsproblem.
+
 \end{abstract}
 
-\section{Introduction}
+\section{Introduktion}
 
-\section{System Specification}
+\section{Systemspecification}
 
 	\begin{tabular}{ l r}
-	   Operating Voltage & +5V\\
-	   Current consumption & ~80mA\\
-	   Something & Something\\
+	   Matningsspänning & +5V\\
+	   Strömförbrukning & ~80mA\\
+	   Någonting & Någonting\\
 	\end{tabular}
 
-\section{System Description}
+\section{Systembeskrivning}
 
-\section{Block Diagram}
+\section{Blockschema}
 
 	\begin{figure}[h!]
 	  \centering
@@ -75,32 +77,34 @@
 	\end{figure}
 
 
-\section{Block, Functionality}
+\section{Block, Funktionalitet}
 
-	\subsection{Data Path}
+	\subsection{Dataväg}
 
-	\subsection{Control Unit}
+	\subsection{Styrenhet}
 
-	\subsection{Functional Modules}
+	\subsection{Funktionsmoduler}
 
-		\subsubsection{DTMF Module and MT8880}
+		\subsubsection{DTMF-Modul och MT8880}
 	
-		\subsubsection{Sound Module and ISD2560P}
+		\subsubsection{Ljudmodul och ISD2560P}
 
-		\subsubsection{Temperature Module and DS18S20}
+		\subsubsection{Temperaturmodul och DS18S20}
 
-{\bf Purpose}
+{\bf Syfte}
 
-The temperature module of the CPLD is tasked with handling the serial communication with
-the DS18S20 Temperature sensors via the 1-Wire buses, and outputting the read temperatures
-to the sound module, allowing playback of current temperatures to the system user.\\
+Temperaturmodulen i CPLD'n är ansvarig för att hantera seriekommunikationen med 
+DS18S20-temperatursensorerna, via entrådsbussarna, samt att ge ut de lästa temperaturerna
+i tecken-belopp-format till ljudmodulen, i syfte att låta den i sin tur spela upp de avlästa
+temperaturen för systemanvändaren.\\
 
-{\noindent \bf 1-Wire Bus}
+{\noindent \bf 1-Trådsbuss}
 
-The 1-wire buses are connected to +5V through pull-up resistors of 4.7kO , and the
-two ends to the master (CPLD) and sensor (DS18S20), respectively. In its idle state, the
-bus is pulled high ("weak drive") by the pull-up resistor. When sending information, the
-two communicating circuits pulls the bus low by a strong logical 0 drive. \\
+Entrådsbussarna är anslutna till matningsspänning (+5V) genom ett pull-up-motstånd på 4.7kO, och
+ändarna av bussen är anslutna till mastern (CPLD) och sensorn (DS18S20), respektive. Då bussen
+befinner sig i viloläge dras den hög ("svag drivning") av pull-up-motståndet. När information
+skickas över bussen drar den kommunicerande (sändande) enheten bussen låg genom att driva den
+med en stark logisk nolla.\\
 
 	\begin{figure}[h!tb]
 	  \centering
@@ -108,116 +112,117 @@ two communicating circuits pulls the bus low by a strong logical 0 drive. \\
 	  	\caption{Schematic of 1-Wire bus}
 	\end{figure}
 
-{\noindent \bf DS18S20 Specifics}
+{\noindent \bf DS18S20}
 
-The temperature sensor used is the Maxim DS18S20, providing the temperature module with
-9 bits of temperature resolution. The sensors used in this system are powered by an external
-voltage supply of +5V, and communicated with using a 1-wire serial bus. The serial communication is
-based on the master issuing Read- and Write-Timeslots. Each such slot is 60-120 us. The temperature
-sensor is reset by the master pulling the bus low for at least 480 us, followed by a presence pulse
-where the sensor itself pulls the bus low for 60-240 us. Following the reset, the sensor circuit accepts
-a ROM-command followed by a Function-command from the master. Each command is a single byte long, and is
-sent as LSB first. The master sends a zero by pulling the bus low for the whole duration of the write slot.
-A one is sent by pulling the bus low for a minimum of 1 us and then releasing it for the rest of the
-write slot. Between each write or read slot, a recovery period of at least 1 us is required.
+Den temperatursensor som används är Maxim DS18S20, som ger temperaturmodulen möjlighet att läsa av temperaturen
+med nio (9) bitars upplösning. Sensorerna som användas i detta system drivs av en extern spänningskälla på +5V,
+och kommunicerar seriellt över en entrådsbuss. Seriekommunikationen baserar på att bus-mastern initierar skriv-
+och läs-luckor. Varje sådan lucka är mellan 60 och 120 us lång. Temperatursensorn initieras genom att mastern
+driver bussen låg i åtminstone 480 us, vilket följs av att temperatursensorkretsen själv drar bussen låg i 60-240 us,
+efter en återhämtningslucka på minst 1 us. Efter initieringen väntar sensorkretsen på ett ROM-kommando från mastern,
+följt av ett Funktions-kommando. Varje sådant kommando är en byte lång, och skickas som LSB-först. Mastern skickar
+en logisk nolla genom att driva bussen låg under hela skrivluckan. En etta skickas genom att mastern driver bussen låg
+under en kort period, 1-15us, och sedan släpper bussen under resten av skrivluckans längd. Mellan varje skriv- eller läslucka
+måste det finnas en återhämtningsperiod på minst 1us.
 
-When the master is done issuing commands, the DS18S20 may (depending on what commands were sent) respond
-with the appropriate data. Similiarily, here the master also must issue a read-time slot by pulling the 
-bus low for 1-8 us, then releasing it. The DS18S20 responds to these slots by either keeping the bus
-low for a 0, or by letting the bus go high for a 1. During this time (up to 15 us after release), the
-master can sample the bus. All data from the DS18S20 is sent as LSB first.\\
+Då mastern är klar med att skicka över ROM- och Funktions-kommando, kan (beroende på vilka kommandon som sändes) DS18S20-kretsen
+svara med aktuell data. På samma sätt som ovan måste mastern här initiera en läs-lucka genom att driva bussen låg i 1-8us, och
+sedan släppa den (högimpediv). DS18S20-kretsen svarar på den allokerade läs-luckan genom att antingen hålla bussen låg för att
+överföra en nolla, eller genom att låta bussen dras hög av pull-up-motståndet för en etta. Under den här tiden (upp till 15 us
+efter att ha släppt bussen) kan mastern sampla bussen för att läsa av vad DS18S20-kretsen skickat. All data som skickas från
+temperatursensorn skickas som LSB-först, och i 2-komplementsform.\\
 
-{\noindent \bf Read Cycle Overview}
+{\noindent \bf Läscykel, Sammanfattning}
 
-A read cycle consists of four stages; Initialization, Command (command issuing), Receive (reading of data) and an idle state.
+En läscykel består av fyra steg: Initialisering, Kommandon, Läsning och Viloläge.
 
-Initialization is performed by pulling the bus low for 512 us, then releasing the bus. The
-temperature sensor responds with a presence pulse by pulling the bus low for about 106 us, confirming
-its presence on the bus and its operational status. 
+Initialiseringen består i av att mastern driver bussen låg i 512 us, sedan släpper den.
+Temperatursensorn svarar med en närvaro-puls genom att driva bussen låg i 106 us, och därgenom bekräftar den sin närvaro
+på bussen och sin operationella status.
 
-Detecting the presence pulse, the master starts to issue a ROM Command (Skip ROM, 0xCC), followed
-by a short recovery time and then a Function Command (Convert Temperature, 0x44), according to the
-read/write-timeslot method described above. The Skip ROM Command is used since the system uses only
-one sensor per 1-Wire bus, and there is no need for addressing specific sensors. The Convert Temperature
-command tells the DS18S20 to start converting temperature and put it in its on-chip memory for later reading.
-During the conversion time (up to 750 ms), the master polls the temperature sensor by continously sending
-requests by pulling the bus low for a short (4 us) period of time. The temperature sensor responds by
-0 while it is busy converting, and then a 1 as soon as it is finished.
-The master then resets the temperature sensor again, and follows up by sending another pair of ROM command
-and Function command, 0xCC (Skip ROM) and 0xBE (Read Scratchpad), respectively. 
-Ideally, the DS18S20 should now be ready to transmit the data stored on its on-chip memory of
-9 bytes. Given the Read Scratchpad command, the DS18S20 now starts sending the contents of its memory
-on the bus. The master goes into Receive mode and starts sampling the data by pulling the bus low,
-releasing it and sampling the bus again after 4 us, all according to the process described above.
-The master samples the first eight bits of data sent by the DS18S20, then another, ninth bit, the temperature sign bit, 
-then gives a reset pulse to signal to the DS18S20, telling it discontinue the data transmission. 
-The newly read temperature is placed on the internal (on CPLD2) temperature bus, and the temperature available signal 
-(TAv) is set to 1, indicating that there is valid data on the bus, according to what was requested by the control unit.\\
+Då mastern detekterat närvaropulsen börjar den överföra ett ROM-kommando (Skip ROM, 0xCC), följt av en kort återhämtningslucka
+och sedan ett Funktions-kommando (Convert Temperature, 0x44), enligt läs-/skriv-luckemetoden som beskrivits ovan.
+Skip-ROM-kommandot används i det här systemet eftersom endast en temperatursensor används per entrådsbuss.
+Därmed finns inget behov av att kunna addressera specifika sensorer på bussen.
+Convert Temperature-kommandot säger till DS18S20-kretsen att börja konvertera temperaturen, och sedan spara den 
+lästa temperaturen i sitt interna minne för att sedan läsas av mastern.
+Under konverteringsperioden (upp till 750 ms) kan mastern polla temperatursensorns status genom att kontinuerligt
+sända förfrågningar genom att dra bussen låg i en kort period (4 us). Temperatursensorn svarar med en nolla
+sålänge den är upptagen med att konvertera temperatur, och sedan en etta såfort den är klar.
+Då mastern ser att temperatursensorn är klar, initiseras temperatursensorn om och ytterligare ett ROM-Funktions-kommandopar
+överförs. Dessa är 0xCC (Skip ROM) följt av 0xBE (Read Scratchpad), respektive.
+Idealt ska temperatursensorkretsen nu vara redo att överföra temperaturdata till mastern från sitt interna 9-bytesminne.
+Då den ges Read Scratchpad-kommandot börjar DS18S20 sända över innehållet i sitt minne över bussen.
+Mastern går då in i läsningsläget och börjar sampla datan på bussen genom att driva bussen låg, släppa den och sampla efter 4 us,
+allt enligt den metod som beskrivs ovan. Mastern samplar de första åtta bitarna data som sänds av DS18S20, sedan en ytterligare,
+nionde bit. Den sista biten utgör en tecken-bit, 0 för positiv temperatur och 1 för negativ. Då den nionde biten data lästs
+ger mastern på nytt en initieringspuls, som säger åt temperatursensorn att sluta sända data.
+Den nyligen lästa temperaturen placeras av temperaturmodulen i CPLD'n (på CPLD2) på den interna temperaturbussen, och
+TAv sätts till 1 för att indikera att det finns korrekt data på bussen, enligt vad som efterfrågades av styrenheten.\\
 
-{\noindent \bf Details}
+{\noindent \bf Detaljer}
 
-The temperature modules is based around a state machine, supported by an internal Buffer/MUX as well
-as a number of counters for generating timing pulses needed. \\
+Temperaturmodulen är baserad runt en tillståndsmaskin, understödd av en intern Buffer/MUX-modul samt 
+ett antal interna räknare för att generera de nödvändiga tidsfördröjningspulserna.\\
 
 {\noindent \bf Buffer/MUX}
 
-The Buffer/MUX module is directly connected to the two DS18S20 temperature sensors using 1-wire communication. The MUX is used for selecting
-which of the two sensors (Sensor 0 or Sensor 1) is to be communicated with, and uses the TSel input signal.
-the buffer is a tri-state buffer with an enable signal, E. When E is set to 1, the selected (by TSel) 1-wire bus
-is used as an output signal from the master. When E is set to 0, the master can read data from the bus.\\
+Buffer/MUX-modulen är direkt ansluten till de två DS18S20-Temperatursensorerna som använder entrådsbusskommunikationen.
+Multiplexern (MUX) används för att välja mellan vilken av de två sensorerna (Sesnor 0 eller Sensor 1) som styrenheten
+vill kommunicera med, och använder signalen TSel.
+Buffern är en tri-state-buffer med en Enable-signal, E. När E är satt till 1 så kan mastern använda den av TSel valda
+entrådsbussen som en utgång för att överföra kommandon. När E är satt till 0 kan mastern läsa data från bussen.\\
 
-{\noindent \bf Counters}
+{\noindent \bf Räknare}
 
-Internally, the temperature module uses a number of counters.\\
+Internt använder temperaturmodulen ett antal olika räknare. \\
 
-{\noindent \bf State Machine}
-	
-For a complete description of the internal state machine used by the temperature module, see the section
-on state machines.\\
+{\noindent \bf Tillståndsmaskin}
 
-		\subsubsection{Control Functions}
+För en uttömmande beskrivning av den interna tillståndsmaskinen som används av temperaturmodulen,
+se sektionen om tillståndsmaskiner.\\
 
-		\subsubsection{Interface}
+		\subsubsection{Kontrollfunktioner}
 
-\section{State Machines}
-		\subsubsection{DS18S20 Serial Communication}
-			(Refering to State Diagram for Temperature Module)
-			Reset: All signals and counters are reset to their default (start-) values.
-			Defaults: By default, all signals retain their old values.
-			Initialization (States 0-3):
-				State 0 : Idle State and Reset Point. The temperature module waits
-						in a loop until it receives a logical one on TRd (Temperature Read).
-						On TRd = 1, the state machines starts running, setting TAv = 0,
-						because the read cycle is now running, and the data on the temperature
-						output bus is no longer valid.
-				State 1 : Delay state, waits for pulse on DelayLong (512 us), then goes to state 2.
-				State 2 : Master pulls bus low for 512 us and sets data to 0xCC (Skip ROM), then goes to state 3.
-				State 3 : Master releases bus, allowing the DS18S20 to send a presence pulse. Waits 512 us.
-			Write (States 4-8):
-				State 4 : Preparation state, master prepares to send and goes to state 5 after 16 us.
-				State 5 : Main Send state, master determines what bit is to be sent next (according to bitCnt).
-				State 6 : Between bits, recovery state. Determines if there are more bits to be sent in the current
-					  byte, according to BitCnt. If so, goes back to state 5. If not, continues to state 7.
-				State 7 : Determines if the DS18S20 is currently converting temperature. If it is, 
-					  
+		\subsubsection{Gränssnitt}
+
+\section{Tillståndsmaskiner}
+		\subsubsection{DS18S20 Seriell Kommunikation}
+			(Refererar till tillståndsdiagramet för temperaturmodulen)
+			Reset: Alla signaler och räknare återställs till sina grundvärden.
+			Grundvärden: Utgångspunkten är att alla signaler behåller sina gamla värden om inget annat anges.
+			Initialisering (Tillstånd 0-3):
+				Tillstånd 0: Viloläge och återställningspunkt. Temperaturmodulen väntar i en slinga tills
+						dess att den detekterar en logisk etta på TRd (Läs temperatur).
+						Vid TRd = 1 börjar tillståndsmaskinen ticka, och sätter TAv = 0,
+						eftersom läscykeln har börjat och den data som finns på temperaturbussen
+						inte längre är valid.
+				Tillstånd 1: Fördröjningstillstånd, väntar på puls på DelayLong (512 us), går sedan till tillstånd 2.
+				Tillstånd 2: Mastern driver bussen låg i 512 us och sätter datavärdet till 0xCC (Skip ROM), går sedan till tillstånd 3.
+				Tillstånd 3: Mastern släpper bussen, vilket tillåter DS18S20 att skicka tillbaka en närvaropuls. Väntar 512 us.
+			Kommandoöverföring (Tillstånd 4-8):
+				Tillstånd 4: Förberedelsetillstånd, mastern förbereder sig på att sända och går till tillstånd 5 efter 16 us.
+				Tillstånd 5: Huvudsändningstillståndet, mastern avgör vilken bit som ska skickas och skickar den (enligt bitCnt-räknaren).
+				Tillstånd 6: Mellanbittillstånd, återhämtningstillständ. Avgör om det finns fler bitar att skicka i nuvarande byte. Annars fortsätt.
+				Tillstånd 7: Avgör om DS18S20 är upptagen med att konvertera temperaturen.
 
 		\subsubsection{MT8880}
 		\subsubsection{ISD2560P}
 
-\section{Timing Diagrams}
+\section{Tidsdiagram}
 
-\section{Fault Analysis}
+\section{Felanalys}
 
 \section{Appendix}
 
-	\subsection{List of Components}
+	\subsection{Komponentlista}
 
-	\subsection{Circuit diagram}
+	\subsection{Kretsschema}
 
-	\subsection{PCB Layout}
+	\subsection{PCB-Schema}
 
-	\subsection{Program listings}
+	\subsection{Programlistningar}
 
-	\subsection{List of Signals}
+	\subsection{Signallista}
 
 \end{document}
