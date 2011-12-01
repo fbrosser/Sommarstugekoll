@@ -18,7 +18,7 @@
 
 \title{Sommarstugekoll \\
 	Digital Konstruktion EDA234 \\ Grupp 2}
-\author{Names \\
+\author{Fredrik Brosser, Karl Buchka, Andreas Henriksson, Johan Wolgers \\
    Chalmers Tekniska Högskola \\
    \texttt{email addresses}}
 
@@ -50,6 +50,8 @@
 
 \end{abstract}
 
+\pagebreak
+
 \section{Introduktion}
 
 \section{Systemspecifikation}
@@ -66,13 +68,13 @@
 
 	\begin{figure}[h!]
 	  \centering
-	      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD1.jpg}
+	      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD1.png}
 	  	\caption{Blockschema (CPLD1)}
 	\end{figure}
 
 	\begin{figure}[h!]
 	  \centering
-	      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD2.jpg}
+	      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD2.png}
 	  	\caption{Blockschema (CPLD2)}
 	\end{figure}
 
@@ -179,7 +181,7 @@ TAv sätts till 1 för att indikera att det finns korrekt data på bussen, enlig
 		Temp & Den interna temperaturdatabussen till ljudmodulen\\\\
 	\end{tabular}
 
-{\noindent \bf Detaljer}
+{\noindent \bf Uppbyggnad}
 
 Temperaturmodulen är baserad runt en tillståndsmaskin, understödd av en intern Buffer/MUX-modul samt 
 ett antal interna räknare för att generera de nödvändiga tidsfördröjningspulserna.\\
@@ -205,7 +207,7 @@ Internt använder temperaturmodulen ett antal olika räknare: \\
 
 {\noindent \bf Tillståndsmaskin}
 
-För en uttömmande beskrivning av den interna tillståndsmaskinen som används av temperaturmodulen,
+För en uttömmande grafisk beskrivning av den interna tillståndsmaskinen som används av temperaturmodulen,
 se sektionen om tillståndsmaskiner.\\
 
 		\subsubsection{Kontrollfunktioner}
@@ -213,21 +215,32 @@ se sektionen om tillståndsmaskiner.\\
 		\subsubsection{Gränssnitt och Knappar}
 
 \section{Tillståndsmaskiner}
-		\subsubsection{DS18S20 Seriell Kommunikation}
+		\subsubsection{Styrenhet}
+		\subsubsection{Temperaturmodul}
 			\\(Refererar till tillståndsdiagramet för temperaturmodulen)\\
 			{\bf Reset:} Alla signaler och räknare återställs till sina grundvärden.\\
 			{\bf Grundvärden:} Utgångspunkten är att alla signaler behåller sina gamla värden om inget annat anges.\\
-			\begin{tabular}{l r}
-				\\{\bf Initialisering (Tillstånd 0-3):} &  \\
-				0 & Viloläge och återställningspunkt. Temperaturmodulen väntar i en slinga tills dess att den detekterar en logisk etta på TRd (Läs temperatur). Vid TRd = 1 börjar tillståndsmaskinen ticka, och sätter TAv = 0, eftersom läscykeln har börjat och den data som finns på temperaturbussen inte längre är valid.\\
-				1 & Fördröjningstillstånd, väntar på puls på DelayLong (512 us), går sedan till tillstånd 2.\\
-				2 & Mastern driver bussen låg i 512 us och sätter datavärdet till 0xCC (Skip ROM), går sedan till tillstånd 3.\\
-				3 & Mastern släpper bussen, vilket tillåter DS18S20 att skicka tillbaka en närvaropuls. Väntar 512 us.\\\\
-				{\bf Kommandoöverföring (Tillstånd 4-8):} &  \\
-				4 & Förberedelsetillstånd, mastern förbereder sig på att sända och går till tillstånd 5 efter 16 us.\\
-				5 & Huvudsändningstillståndet, mastern avgör vilken bit som ska skickas och skickar den (enligt bitCnt-räknaren).\\
-				6 & Mellanbittillstånd, återhämtningstillständ. Avgör om det finns fler bitar att skicka i nuvarande byte. Annars fortsätt.\\
-				7 & Avgör om DS18S20 är upptagen med att konvertera temperaturen.\\\\
+			\begin{tabular}{l}
+				\\{\bf Viloläge (Tillstånd 0):}\\
+				0: Viloläge och återställningspunkt. Inväntar TRd = 1 från Styrenheten\\
+				{\bf Initialisering (Tillstånd 1-3):}\\
+				1: Fördröjningstillstånd, väntar på puls på DelayLong (512 us)\\
+				2: Mastern driver bussen låg i 512 us och sätter datavärdet till 0xCC (Skip ROM)\\
+				3: Mastern släpper bussen, DS18S20 skickar närvaropuls\\
+				{\bf Kommandoöverföring (Tillstånd 4-8):}\\
+				4: Förberedelsetillstånd före sändning\\
+				5: Huvudsändningstillståndet, mastern sänder bit enligt aktuellt räknarvärde\\
+				6: Mellanbittillstånd, återhämtningstillständ. Fortsätter om fler bitar ska skickas\\
+				7: Avgör om DS18S20 är upptagen med att konvertera temperaturen. Om så, vänta tills klar\\
+				8: Vägskälstillstånd. Om vi har fler kommandon att skicka, gå tillbaka, annars börja läsa\\
+				{\bf Läsning (Tillstånd 9-15):}\\
+				9:  Förberedelsetillstånd före läsning\\
+				10: Mastern initierar en läslucka genom att dra bussen låg i 4 us\\
+				11: Mastern väntar ytterligare 4 us för att pull-up-motståndet ska få verka\\
+				12: Mastern samplar bussen. Om DS18S20 skickar en nolla hålls bussen låg, annars inte\\
+				13: Återhämtningstillstånd mellan samplingar\\
+				14: Vägskälstillstånd. Om vi har fler bitar att läsa, gå tillbaka, annars gå vidare\\
+				15: Läsning klar, lägg ut temperatur på buss och signallera valid data. Gå tillbaka till 0\\
 			\end{tabular}
 
 	\begin{figure}[h!tb]
@@ -242,8 +255,8 @@ se sektionen om tillståndsmaskiner.\\
 	  	\caption{Detaljerat State Machine-diagram för Temperaturläscykel}
 	\end{figure}
 
-		\subsubsection{MT8880}
-		\subsubsection{ISD2560P}
+		\subsubsection{DTMF-Modul}
+		\subsubsection{Ljudmodul}
 
 \section{Tidsdiagram}
 
@@ -267,8 +280,6 @@ se sektionen om tillståndsmaskiner.\\
 	\end{tabular}
 
 	\subsection{Kretsschema}
-
-	\subsection{PCB-Schema}
 
 	\subsection{Programlistningar}
 
