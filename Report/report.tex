@@ -67,13 +67,13 @@
 	\begin{figure}[h!]
 	  \centering
 	      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD1.jpg}
-	  	\caption{Block Diagram (CPLD1)}
+	  	\caption{Blockschema (CPLD1)}
 	\end{figure}
 
 	\begin{figure}[h!]
 	  \centering
 	      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD2.jpg}
-	  	\caption{Block Diagram (CPLD2)}
+	  	\caption{Blockschema (CPLD2)}
 	\end{figure}
 
 
@@ -108,8 +108,8 @@ med en stark logisk nolla.\\
 
 	\begin{figure}[h!tb]
 	  \centering
-	      \includegraphics[scale=0.5, angle=0]{TempBus.png}
-	  	\caption{Schematic of 1-Wire bus}
+	      \includegraphics[scale=1, angle=0]{TempBus.png}
+	  	\caption{Uppkoppling, Entrådsbuss}
 	\end{figure}
 
 {\noindent \bf DS18S20}
@@ -159,6 +159,12 @@ nionde bit. Den sista biten utgör en tecken-bit, 0 för positiv temperatur och 
 ger mastern på nytt en initieringspuls, som säger åt temperatursensorn att sluta sända data.
 Den nyligen lästa temperaturen placeras av temperaturmodulen i CPLD'n (på CPLD2) på den interna temperaturbussen, och
 TAv sätts till 1 för att indikera att det finns korrekt data på bussen, enligt vad som efterfrågades av styrenheten.\\
+
+	\begin{figure}[h!tb]
+	  \centering
+	      \includegraphics[scale=0.5, angle=0]{ReadCycleFlowChart.png}
+	  	\caption{Högnivå-flödesdiagram för Temperaturläscykel}
+	\end{figure}
 
 {\noindent \bf Signaler}
 
@@ -224,10 +230,28 @@ se sektionen om tillståndsmaskiner.\\
 				7 & Avgör om DS18S20 är upptagen med att konvertera temperaturen.\\\\
 			\end{tabular}
 
+	\begin{figure}[h!tb]
+	  \centering
+	      \includegraphics[scale=0.5, angle=0]{StateMachineExplained.png}
+	  	\caption{Förklaring till State Machine-diagram}
+	\end{figure}
+
+	\begin{figure}[h!tb]
+	  \centering
+	      \includegraphics[scale=0.4, angle=0]{TempStateMachineDiagram.png}
+	  	\caption{Detaljerat State Machine-diagram för Temperaturläscykel}
+	\end{figure}
+
 		\subsubsection{MT8880}
 		\subsubsection{ISD2560P}
 
 \section{Tidsdiagram}
+
+	\begin{figure}[h!tb]
+	  \centering
+	      \includegraphics[scale=0.5, angle=0]{TempTiming.png}
+	  	\caption{Timingdiagram för Temperaturmodulen}
+	\end{figure}
 
 \section{Felanalys}
 
