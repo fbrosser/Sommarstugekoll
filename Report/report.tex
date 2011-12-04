@@ -50,6 +50,24 @@
 
 \end{abstract}
 
+\begin{abstract}
+
+	The system described in this report is an automated domestic temperature control system, accessible and controllable via
+	a standard telephone connection (DTMF). The main functionality of the system is informing the user of the current temperatures
+	at the points of measurement, and also to give the user the ability to remotely control (simple on/off) a number of external
+	functions. These functions could be, for example, heating systems, radiators or air conditioning. Information- and control data
+	is exchanged via a standard, analog telephone connection, using DTMF: Dual Tone, Multiple Frequency.
+
+	A specific, practical usage example is the concerned holiday home owner wanting to keep control of the heating in his summer house.
+	Using Sommarstugekoll, one can keep the temperature at a reasonable level, avoiding for example pipes freezing, but at the same time
+	keeping the total heating costs to a minimum. Sommarstugekoll solves this by offering users a neat and simple way to keep track
+	of in- and outdoor temperatures - when the previously mentioned summer house owner wishes to make a visit, he simply dials the
+	summer house telephone number giving it instructions to bring the temperature up to a comfortable level, all while he makes
+	the drive up. Simple - smart - elegant - Sommarstugekoll is the domestic temperature automation assistant of the future!
+
+\end{abstract}
+
+
 \pagebreak
 
 \section{Introduktion}
@@ -59,7 +77,9 @@
 	ett digital system utifrån en vag specifikation, där fokus låg på huvudfunktionaliteten.
 	Utvecklingen har skett med hjälp av ett färdigt baslaborationskort som sedan byggts på med externa kretsar för den funktionalitet
 	som specifierats. Logikkretsen som har använts är en Xilinx XC9572XL CPLD, och utveckligen har i huvudsak skett i VHDL och Xilinx ISE-miljön,
-	samt i ModelSim för simuleringar. Denna rapport är uppdelad i flera olika abstraktionslager för att passa läsaren. 
+	samt i ModelSim för simuleringar. Denna rapport är uppdelad i flera olika abstraktionslager för att passa läsaren och dennes specifika intresseområden. 
+
+	En ren användarmanual finns bifogad i Appendix.
 
 \section{Systemspecifikation}
 
@@ -71,9 +91,11 @@
 
 \section{Systembeskrivning}
 
-	Systemet är uppdelat i ett antal delblock (moduler), och är skrivet för att vara så modulärt som möjligt.
+	\subsection{Uppdelning}
+
+	Systemet består av ett antal delblock (moduler), och är skrivet för att vara så modulärt som möjligt.
 	Nedan följer en sammanfattande tabell över de olika modulerna och deras funktioner. Varje modul är mer
-	utförligt beskriven i sektionen {\it Block, Funktionalitet}
+	utförligt beskriven i sektionen {\it Block, Funktionalitet}. För en komplett överblick, se Blockschema.
 
 	\begin{tabular}{ l r}
 		{\bf Modul} & {\bf Funktion}\\
@@ -85,6 +107,19 @@
 		Funktions-Modul & Hanterar funktionerna och deras status\\
 	\end{tabular}
 
+	Systemet är uppdelat enligt dataväg-styrenhet-modellen, där designprincipen går ut på att skilja styrsignaler
+	och dataflödeskontroll (Styrenheten) från själva datan som forslas genom systemet (Datavägen). Den data som
+	skickas inom systemet är i första hand temperaturdata från temperaturmodulen till ljudmodulen, och ljud som
+	lagras på den externa ljudlagringskretsen och hanteras av ljudmodulen. Detta flöde kontrolleras från styrenheten via
+	enkla styrsignaler. Viss data, i form av indata från användargränssnitt och utdata till funktionsstatus, passerar
+	dock genom styrenheten.
+
+	\subsection{Översikt}
+
+	Systemet bygger på DTMF-kommunikation (Dual Tone Multiple Frequency, Tonval). Telefonen skickar ut DTMF-signaler, som kan
+	läsas och avkodas av DTMF-avkodarkretsen, MT8880. DTMF-signaler består av två toner som tillsammans unikt ger vilken
+	siffra på telefonens knappsats som användaren tryckt på. 
+ 
 
 \section{Blockschema}
 
@@ -103,6 +138,8 @@
 \section{Block, Funktionalitet}
 
 	\subsection{Dataväg}
+
+		
 
 	\subsection{Styrenhet}
 
@@ -302,7 +339,19 @@ se sektionen om tillståndsmaskiner.\\
 
 	\subsection{Kretsschema}
 
-	\subsection{Programlistningar}
+	\subsection{Pin-Layout}
+
+		\begin{figure}[h!]
+		  \centering
+		      \includegraphics[scale=0.48, angle=0]{PinDiagram.png}
+		  	\caption{Pin-Konfiguration (CPLD1)}
+		\end{figure}
+
+		\begin{figure}[h!]
+		  \centering
+		      \includegraphics[scale=0.48, angle=0]{PinDiagram.png}
+		  	\caption{Pin-Konfiguration (CPLD2)}
+		\end{figure}
 
 	\subsection{Signallista}
 	\begin{tabular}{l c1 c2 r}
@@ -350,6 +399,8 @@ se sektionen om tillståndsmaskiner.\\
 		EOM & Interrupt & IDS2560P & Ljudmodul & End-Of-Message från ISD2560P\\\\
 	\end{tabular}
 
+	\subsection{Programlistningar}
+	
 	\subsection{Arbetsfördelning}
 
 	\begin{tabular}{l c r}
