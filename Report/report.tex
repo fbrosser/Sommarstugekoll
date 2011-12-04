@@ -54,6 +54,13 @@
 
 \section{Introduktion}
 
+	Konstruktionsprojektet har utförts inom ramarna för kursen "Digital Konstruktion EDA234" vid Chalmers Tekniska Högskola.
+	Uppgiften var att inom gruppen (4 personer) relativt självständigt (med stöd från handledare) konstruera och dokumentera
+	ett digital system utifrån en vag specifikation, där fokus låg på huvudfunktionaliteten.
+	Utvecklingen har skett med hjälp av ett färdigt baslaborationskort som sedan byggts på med externa kretsar för den funktionalitet
+	som specifierats. Logikkretsen som har använts är en Xilinx XC9572XL CPLD, och utveckligen har i huvudsak skett i VHDL och Xilinx ISE-miljön,
+	samt i ModelSim för simuleringar. Denna rapport är uppdelad i flera olika abstraktionslager för att passa läsaren. 
+
 \section{Systemspecifikation}
 
 	\begin{tabular}{ l r}
@@ -63,6 +70,21 @@
 	\end{tabular}
 
 \section{Systembeskrivning}
+
+	Systemet är uppdelat i ett antal delblock (moduler), och är skrivet för att vara så modulärt som möjligt.
+	Nedan följer en sammanfattande tabell över de olika modulerna och deras funktioner. Varje modul är mer
+	utförligt beskriven i sektionen {\it Block, Funktionalitet}
+
+	\begin{tabular}{ l r}
+		{\bf Modul} & {\bf Funktion}\\
+	   	Styrenhet & Samordnar systemfunktioner\\
+	  	Temperaturmodul & Initierar, läser och presenterar temperatur\\
+	   	DTMF-Modul & Tar emot DTMF-signaler från användaren\\
+		Ljud-Modul & Spelar upp ljud lagrade på extern minneskrets\\
+		Knappsats-Modul & Hanterar knapptryckningar från användaren\\
+		Funktions-Modul & Hanterar funktionerna och deras status\\
+	\end{tabular}
+
 
 \section{Blockschema}
 
@@ -77,7 +99,6 @@
 	      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD2.png}
 	  	\caption{Blockschema (CPLD2)}
 	\end{figure}
-
 
 \section{Block, Funktionalitet}
 
@@ -284,5 +305,59 @@ se sektionen om tillståndsmaskiner.\\
 	\subsection{Programlistningar}
 
 	\subsection{Signallista}
+	\begin{tabular}{l c1 c2 r}
+		\\{\bf Signal} & {\bf Typ} & {\bf Från} & {\bf Till} & {\bf Beskrivning}\\ \\
+		clk & Global & Extern & Allt & Global Klocksignal\\
+		rst & Global & Extern & Allt & Global Resetsignal\\
+		Buttons[3..0] & Databuss & Knappsats & Knappsatsmodul & Indatavektor\\
+		KBDav & Available & Knappsats & Knappsatsmodul & Availablesignal\\
+		FuncData[3..0] & Databuss & Funktionsmodul & FunktionsLEDs & Funktionsstyrningssignaler\\
+		DTMFData[3..0] & Databuss & DTMF-Modul & MT8880 & Databuss till MT8880\\
+		Phi2 & Klocksignal & DTMF-Modul & MT8880 & Klocksignal till MT8880\\
+		R/W & Styrsignal & DTMF-Modul & MT8880 & Read/Write till MT8880\\
+		RS0 & Styrsignal & DTMF-Modul & MT8880 & Intieringssignal till MT8880\\
+		IRQ & Interrupt & MT8880 & DTMF-Modul & Interruptsignal från MT8880\\
+
+		KData[3..0] & Databuss & Knappsatsmodul & Styrenhet & Data från knappsatsmodul\\
+		KAv & Styrsignal & Knappsatsmodul & Styrenhet & Availablesignal från knappsatsmodul\\
+		KAck & Acknowledgement & Styrenhet & Knappsatsmodul & Acknowledgementsignal till knappsatsmodul\\
+
+		TSel & Databuss & Styrenhet & Temperaturmodul & Selectsignal för temperatursensorer (0/1)\\
+		TRd & Styrsignal & Styrenhet & Temperaturmodul & Read-signal (starta läsning)\\
+		TAv & Available & Temperaturmodul & Styrenhet & Availablesignal, valid data på buss\\
+
+		SData[3..0] & Adressbuss & Styrenhet & Ljudmodul & Ljudadressbuss\\
+		SSel & Styrsignal & Styrenhet & Ljudmodul & Selectsignal för temperatur/ljud\\
+		SPlay & Styrsignal & Styrenhet & Ljudmodul & Play-signal (spela ljud)\\
+		SDone & Styrsignal & Ljudmodul & Styrenhet & Signallerar uppspelning färdig\\
+
+		DData[3..0] & Databuss (bidir.) & DTMF-Modul & Styrenhet & DTMF-Databuss\\
+		DAv & Acknowledgement & DTMF-Modul & Styrenhet & Availablesignal från DTMF-Modul\\
+		DAck & Styrsignal & Styrenhet & DTMF-Modul & Acknowledgement från Styrenhet\\
+
+		FData[3..0] & Databuss & Styrenhet & Funktionsmodul & Funktionsstatusbuss\\
+
+		SP+ & Analog & ISD250P & MT8880 & Analog ljudsignal (+)\\
+		SP- & Analog & ISD250P & MT8880 & Analog ljudsignal (-)\\
+
+		DQ0 & Seriellbuss (bidir.) & Temperaturmodul & DS18S20 & 1-trådsbuss\\
+		DQ1 & Seriellbuss (bidir.) & Temperaturmodul & DS18S20 & 1-trådsbuss\\
+
+		Temp[7..0] & Databuss & Temperaturmodul & Ljudmodul & Temperaturdatabuss\\
+
+		Addr[4..0] & Adressbuss & Ljudmodul & ISD2560P & Adressbuss till ISD2560P\\
+		CE & Styrsignal & Ljudmodul & ISD2560P & Chip-Enable från ljudmodul\\
+		EOM & Interrupt & IDS2560P & Ljudmodul & End-Of-Message från ISD2560P\\\\
+	\end{tabular}
+
+	\subsection{Arbetsfördelning}
+
+	\begin{tabular}{l c r}
+		\\{\bf Namn} & {\bf Moduler / Ansvar} & {\bf Övrigt}\\
+		Fredrik Brosser 	& ?? 	& ??\\
+		Karl Buchka 		& ?? 	& ??\\
+		Andreas Henriksson 	& ?? 	& ??\\
+		Johan Wolgers 		& ??	& ??\\\\
+	\end{tabular}
 
 \end{document}
