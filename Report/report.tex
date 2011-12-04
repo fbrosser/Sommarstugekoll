@@ -19,8 +19,11 @@
 \title{Sommarstugekoll \\
 	Digital Konstruktion EDA234 \\ Grupp 2}
 \author{Fredrik Brosser, Karl Buchka, Andreas Henriksson, Johan Wolgers \\
-   Chalmers Tekniska Högskola \\
-   \texttt{email addresses}}
+   Chalmers Tekniska Högskola \\\\
+  	\texttt{	frebro @ student.chalmers.se }\\
+	\texttt{	karlbu @ student.chalmers.se }\\
+	\texttt{	henriksa @ student.chalmers.se }\\
+	\texttt{	wolgers @ student.chalmers.se \\ }}
 
 \maketitle
 
@@ -30,7 +33,11 @@
 
 \pagebreak
 
-\begin{abstract}
+\begin{center}
+{\noindent \bf Sammanfattning}
+\end{center}
+
+% \begin{abstract}
 
 	Systemet som beskrivs i denna rapport är ett automatiserat temperaturkontrollsystem som är åtkomstbart och styrbart via
 	telefon (DTMF). Systemets huvudfunktionalitet är att informera användaren om de aktuella temperaturerna som läses från
@@ -45,12 +52,13 @@
 	Om ägaren till en sommarstuga vill göra ett besök ringer han/hon helt enkelt upp sommarstugan och slår på lämpliga element, så att
 	sommarstugan hinner värmas till en behaglig temperatur medans ägaren kör dit.
 
-	Systemet självt kräver endast en telefonlinje och en vanlig spänningskälla på 5V. Eftersom det är effektsnålt kan systemet stå
-	på under långa perioder, vilket gör det en lätt och trevlig lösning på alla dina sommarstugeuppvärmningsproblem.
+% \end{abstract}
 
-\end{abstract}
+\begin{center}
+{\noindent \bf Abstract}
+\end{center}
 
-\begin{abstract}
+% \begin{abstract}
 
 	The system described in this report is an automated domestic temperature control system, accessible and controllable via
 	a standard telephone connection (DTMF). The main functionality of the system is informing the user of the current temperatures
@@ -65,8 +73,7 @@
 	summer house telephone number giving it instructions to bring the temperature up to a comfortable level, all while he makes
 	the drive up. Simple - smart - elegant - Sommarstugekoll is the domestic temperature automation assistant of the future!
 
-\end{abstract}
-
+% \end{abstract}
 
 \pagebreak
 
@@ -83,11 +90,21 @@
 
 \section{Systemspecifikation}
 
+{\noindent \bf Originalspecifikation} \\\\
+"Sommarstugekoll.\\
+
+Via telefon skall det gå att ringa upp enheten och få reda på temperaturen. 
+Vidare skall det gå att aktivera en eller flera av fyra funktioner (värmeelement som simuleras med ljusdioder). 
+För avläsning av temperatur används DS18S20." \\\\
+
 	\begin{tabular}{ l r}
-	   Matningsspänning & +5V\\
-	   Strömförbrukning & ~80mA\\
-	   Någonting & Någonting\\
+	   	Matningsspänning & +5V\\
+	   	Strömförbrukning & ~80mA\\
+	   	Temperaturmätspann & +/- 31.5 C\\
+		Temperaturupplösning & 0.5 C\\	
 	\end{tabular}
+
+\pagebreak
 
 \section{Systembeskrivning}
 
@@ -95,16 +112,16 @@
 
 	Systemet består av ett antal delblock (moduler), och är skrivet för att vara så modulärt som möjligt.
 	Nedan följer en sammanfattande tabell över de olika modulerna och deras funktioner. Varje modul är mer
-	utförligt beskriven i sektionen {\it Block, Funktionalitet}. För en komplett överblick, se Blockschema.
+	utförligt beskriven i sektionen {\it Block, Funktionalitet}. För en komplett överblick, se Blockschema. \\\\
 
 	\begin{tabular}{ l r}
 		{\bf Modul} & {\bf Funktion}\\
 	   	Styrenhet & Samordnar systemfunktioner\\
 	  	Temperaturmodul & Initierar, läser och presenterar temperatur\\
-	   	DTMF-Modul & Tar emot DTMF-signaler från användaren\\
-		Ljud-Modul & Spelar upp ljud lagrade på extern minneskrets\\
-		Knappsats-Modul & Hanterar knapptryckningar från användaren\\
-		Funktions-Modul & Hanterar funktionerna och deras status\\
+	   	DTMF-modul & Tar emot DTMF-signaler från användaren\\
+		Ljudmodul & Spelar upp ljud lagrade på extern minneskrets\\
+		Knappsatsmodul & Hanterar knapptryckningar från användaren\\
+		Funktionsmodul & Hanterar funktionerna och deras status\\\\
 	\end{tabular}
 
 	Systemet är uppdelat enligt dataväg-styrenhet-modellen, där designprincipen går ut på att skilja styrsignaler
@@ -118,7 +135,9 @@
 
 	Systemet bygger på DTMF-kommunikation (Dual Tone Multiple Frequency, Tonval). Telefonen skickar ut DTMF-signaler, som kan
 	läsas och avkodas av DTMF-avkodarkretsen, MT8880. DTMF-signaler består av två toner som tillsammans unikt ger vilken
-	siffra på telefonens knappsats som användaren tryckt på. 
+	siffra på telefonens knappsats som användaren tryckt på. DTMF-Mottagaren avkodar signalerna och skickar in den resulterande
+	datan till CPLD'n. Beroende på vilket kommando användaren gett beslutar CPLD'n vad som skall hända näst. Är kommandot ett
+	funktionskommand (Funktion på eller av) så sätter CPLD'n statusen för den specifika funktionen till det önskade. 
  
 
 \section{Blockschema}
@@ -142,6 +161,20 @@
 		
 
 	\subsection{Styrenhet}
+
+{\bf Syfte}
+
+Styrenheten kontrollerar och ger styrsignaler för att överse de övriga systemdelarna. Syftet är att ge en
+lätt överblick över hela körningscykeln, där styrenheten har kontrollen över funktionerna via en rad styr-,
+available- och acknowledgesignaler.
+
+{\noindent \bf Uppbyggnad}
+
+Styrenheten är i sin tur modulärt uppbyggd, och har ett väl avgränsat interface mot varje annan delmodul.
+
+{\noindent \bf Tillståndsmaskin}
+
+För en ingående grafisk beskrivning av den bakomliggande tillståndsmaskinen, se sektionen om Tillståndmaskiner.
 
 	\subsection{Funktionsmoduler}
 
@@ -270,7 +303,23 @@ se sektionen om tillståndsmaskiner.\\
 
 		\subsubsection{Kontrollfunktioner}
 
+{\noindent \bf Syfte}
+
+Funktionsmodulen är mycket enkelt uppbyggd, den tar emot data från Styrenheten och skickar vidare 
+uppdateringarna ut på de I/O-pinnar som används för funktionerna. 
+
 		\subsubsection{Gränssnitt och Knappar}
+
+{\noindent \bf Syfte}
+
+Systemet har, förutom DTMF-kontroll, även ett fysiskt gränssnitt med en knappsats samt en På/Av-Brytare för temperaturläsning.
+Dessa rådata måste formateras, avkodas och presenteras för styrenheten. Detta är Knappsatsmodulens uppgift.
+
+Om en knapp på knappsatsen trycks ned, skickas en availablesignal (DAv) från knappsatsen till knappsatsmodulen, som sedan
+avkodar vilken knapp som tryckts ned, och presenterar detta för styrenheten genom att höja en KAv (Keyboard Available)-signal,
+vilket indikerar valid data på knappsatsdatabussen, KData[3..0]. Genom att skicka en Acknowledgement-signal, KAck, bekräftar 
+styrenheten att den sett och mottagit datan från knappsatsen.
+
 
 \section{Tillståndsmaskiner}
 		\subsubsection{Styrenhet}
@@ -326,6 +375,10 @@ se sektionen om tillståndsmaskiner.\\
 
 \section{Felanalys}
 
+{\noindent \bf Temperaturfel}
+
+Då systemet hanterar avläsning av temperaturer och endast klarar ett 
+
 \section{Appendix}
 
 	\subsection{Komponentlista}
@@ -354,53 +407,51 @@ se sektionen om tillståndsmaskiner.\\
 		\end{figure}
 
 	\subsection{Signallista}
-	\begin{tabular}{l c1 c2 r}
-		\\{\bf Signal} & {\bf Typ} & {\bf Från} & {\bf Till} & {\bf Beskrivning}\\ \\
-		clk & Global & Extern & Allt & Global Klocksignal\\
-		rst & Global & Extern & Allt & Global Resetsignal\\
-		Buttons[3..0] & Databuss & Knappsats & Knappsatsmodul & Indatavektor\\
-		KBDav & Available & Knappsats & Knappsatsmodul & Availablesignal\\
-		FuncData[3..0] & Databuss & Funktionsmodul & FunktionsLEDs & Funktionsstyrningssignaler\\
-		DTMFData[3..0] & Databuss & DTMF-Modul & MT8880 & Databuss till MT8880\\
-		Phi2 & Klocksignal & DTMF-Modul & MT8880 & Klocksignal till MT8880\\
-		R/W & Styrsignal & DTMF-Modul & MT8880 & Read/Write till MT8880\\
-		RS0 & Styrsignal & DTMF-Modul & MT8880 & Intieringssignal till MT8880\\
-		IRQ & Interrupt & MT8880 & DTMF-Modul & Interruptsignal från MT8880\\
+	\begin{tabular}{l c c r}
+		\\{\bf Signal} & {\bf Från} & {\bf Till} & {\bf Beskr.}\\ \\
+		clk & Extern & Allt & Global Klocksignal\\
+		rst & Extern & Allt & Global Resetsignal\\
+		Buttons[3..0] & Knappsats & Knappsatsmodul & Indatavektor\\
+		KBDav & Knappsats & Knappsatsmodul & Availablesignal\\
+		FuncData[3..0] & Funktionsmodul & FunktionsLEDs & Funktionsstyrning\\
+		DTMFData[3..0] & DTMF-Modul & MT8880 & Databuss till MT8880 (bidir.)\\
+		Phi2 & DTMF-Modul & MT8880 & Klocksignal till MT8880\\
+		R/W & DTMF-Modul & MT8880 & Read/Write till MT8880\\
+		RS0 & DTMF-Modul & MT8880 & Intieringssignal till MT8880\\
+		IRQ & MT8880 & DTMF-Modul & Interruptsignal från MT8880\\
 
-		KData[3..0] & Databuss & Knappsatsmodul & Styrenhet & Data från knappsatsmodul\\
-		KAv & Styrsignal & Knappsatsmodul & Styrenhet & Availablesignal från knappsatsmodul\\
-		KAck & Acknowledgement & Styrenhet & Knappsatsmodul & Acknowledgementsignal till knappsatsmodul\\
+		KData[3..0] & Knappsatsmodul & Styrenhet & Data från knappsatsmodul\\
+		KAv & Knappsatsmodul & Styrenhet & Availablesignal från knappsatsmodul\\
+		KAck & Styrenhet & Knappsatsmodul & Ack. till knappsatsmodul\\
 
-		TSel & Databuss & Styrenhet & Temperaturmodul & Selectsignal för temperatursensorer (0/1)\\
-		TRd & Styrsignal & Styrenhet & Temperaturmodul & Read-signal (starta läsning)\\
-		TAv & Available & Temperaturmodul & Styrenhet & Availablesignal, valid data på buss\\
+		TSel & Styrenhet & Temperaturmodul & Sensorselectsignal\\
+		TRd & Styrenhet & Temperaturmodul & Read-signal (starta läsning)\\
+		TAv & Temperaturmodul & Styrenhet & Availablesignal, valid data\\
 
-		SData[3..0] & Adressbuss & Styrenhet & Ljudmodul & Ljudadressbuss\\
-		SSel & Styrsignal & Styrenhet & Ljudmodul & Selectsignal för temperatur/ljud\\
-		SPlay & Styrsignal & Styrenhet & Ljudmodul & Play-signal (spela ljud)\\
-		SDone & Styrsignal & Ljudmodul & Styrenhet & Signallerar uppspelning färdig\\
+		SData[3..0] & Styrenhet & Ljudmodul & Ljudadressbuss\\
+		SSel & Styrenhet & Ljudmodul & Selectsignal för temperatur/ljud\\
+		SPlay & Styrenhet & Ljudmodul & Play-signal (spela ljud)\\
+		SDone & Ljudmodul & Styrenhet & Signallerar uppspelning färdig\\
 
-		DData[3..0] & Databuss (bidir.) & DTMF-Modul & Styrenhet & DTMF-Databuss\\
-		DAv & Acknowledgement & DTMF-Modul & Styrenhet & Availablesignal från DTMF-Modul\\
-		DAck & Styrsignal & Styrenhet & DTMF-Modul & Acknowledgement från Styrenhet\\
+		DData[3..0] & DTMF-Modul & Styrenhet & DTMF-Databuss\\
+		DAv & DTMF-Modul & Styrenhet & Availablesignal från DTMF-Modul\\
+		DAck & Styrenhet & DTMF-Modul & Acknowledgement från Styrenhet\\
 
-		FData[3..0] & Databuss & Styrenhet & Funktionsmodul & Funktionsstatusbuss\\
+		FData[3..0] & Styrenhet & Funktionsmodul & Funktionsstatusbuss\\
 
-		SP+ & Analog & ISD250P & MT8880 & Analog ljudsignal (+)\\
-		SP- & Analog & ISD250P & MT8880 & Analog ljudsignal (-)\\
+		SP+ & ISD250P & MT8880 & Analog ljudsignal (+)\\
+		SP- & ISD250P & MT8880 & Analog ljudsignal (-)\\
 
-		DQ0 & Seriellbuss (bidir.) & Temperaturmodul & DS18S20 & 1-trådsbuss\\
-		DQ1 & Seriellbuss (bidir.) & Temperaturmodul & DS18S20 & 1-trådsbuss\\
+		DQ0 & Temperaturmodul & DS18S20 & Seriell 1-trådsbuss (bidir.)\\
+		DQ1 & Temperaturmodul & DS18S20 & Seriell 1-trådsbuss (bidir.)\\
 
-		Temp[7..0] & Databuss & Temperaturmodul & Ljudmodul & Temperaturdatabuss\\
+		Temp[7..0] & Temperaturmodul & Ljudmodul & Temperaturdatabuss\\
 
-		Addr[4..0] & Adressbuss & Ljudmodul & ISD2560P & Adressbuss till ISD2560P\\
-		CE & Styrsignal & Ljudmodul & ISD2560P & Chip-Enable från ljudmodul\\
-		EOM & Interrupt & IDS2560P & Ljudmodul & End-Of-Message från ISD2560P\\\\
+		Addr[4..0] & Ljudmodul & ISD2560P & Adressbuss till ISD2560P\\
+		CE & Ljudmodul & ISD2560P & Chip-Enable från ljudmodul\\
+		EOM & IDS2560P & Ljudmodul & End-Of-Message från ISD2560P\\\\
 	\end{tabular}
 
-	\subsection{Programlistningar}
-	
 	\subsection{Arbetsfördelning}
 
 	\begin{tabular}{l c r}
@@ -411,4 +462,6 @@ se sektionen om tillståndsmaskiner.\\
 		Johan Wolgers 		& ??	& ??\\\\
 	\end{tabular}
 
+	\subsection{Programlistningar}
+	
 \end{document}
