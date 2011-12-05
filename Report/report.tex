@@ -377,17 +377,52 @@ styrenheten att den sett och mottagit datan från knappsatsen.
 
 {\noindent \bf Temperaturfel}
 
-Då systemet hanterar avläsning av temperaturer och endast klarar ett 
+Då systemet hanterar avläsning av temperaturer och endast klarar ett begränsat temperaturintevall
+görs här en felanalys (mätfel). För de tillämpningsområden systemet är konstruerat för (Hemanvändare) 
+är mätfelen dock för små för att ha betydelse.
+
+Temperatursensorerna arbetar med en temperaturupplösning på 0.5°C, och här fås alltså därför en oexakthet.
+Enligt temperatursensorns datablad gäller exaktheten på +/- 0.5°C i intervallet -10°C till +85°C.
+Systemet arbetar med ett temperaturspann på +/- 32°C, allt utanför intervallet representeras som maxtemperaturen.
+
+Testning av temperaturavläsningen har gjorts under utvecklingsperioden genom att värma och kyla temperatursensorerna,
+och sensorerna visade de väntade resultaten, då jämförelser gjordes för inom- och utomhustemperatur kontrollerat med
+en vanlig, kommersiell fönstertermometer med samma upplösning. Slutsatsen från jämförelserna blir att de två 
+termometrarna följer varandra bra, och det går inte att avgöra vilken som är mer exakt. För vanlig hemanvändning
+är båda fullt tillräckliga.
+
+Jämförelserna och resultaten presenteras i en tabell nedan: 
+
+	\begin{tabular}{l c r}
+		\\{\bf DS18S20} & {\bf Fönstertermometer} & {\bf Differens [°C]}\\
+		4.5 & 5 & -0.5\\		
+		11 & 9 & 2\\		
+		18 & 18 & 0\\
+		20 & 20 & 0\\	
+		22 & 22 & 0\\
+		25 & 26 & 0\\		
+		36.5 & 37 & -0.5\\
+		70.5 & 73 & -2.5 \\\\
+	\end{tabular}
 
 \section{Appendix}
 
 	\subsection{Komponentlista}
-	\begin{tabular}{l r}
-		\\{\bf Namn} & {\bf Beskrivning}\\
-		XC9572XL (x2) & CPLD\\
-		DS18S20 (x2) & Temperatursensor\\
-		MT8880C & DTMF Transceiver\\
-		ISD2560P & Ljudlagringskrets\\\\
+	\begin{tabular}{l c r}
+		\\{\bf Namn} & {\bf Typ} & {\bf Beskrivning}\\
+		IC1 & XC9572XL & CPLD m. Styrenhet och DTMF-Avkodning\\
+		IC2 & XC9572XL & CPLD m. Temperaturavläsning och Ljudhantering 		
+		IC3 & DS18S20  & Temperatursensor A\\
+		IC4 & DS18S20  & Temperatursensor B\\
+		IC5 & MT8880C  & DTMF Transceiver\\
+		IC6 & ISD2560P & 60s. Ljudlagringskrets\\\\
+		R1-R2 & 4.7kOhm & Pull-Up-mostånd
+		R3 & 10kOhm & Pull-Up-mostånd
+		R4 & 15kOhm & Pull-Down-mostånd
+		R5-R18 & 1.5kOhm & LED-motstånd
+		SW1 & Switch & ON/OFF-Switch
+		LA & LED-Array & Temperatur-display
+		
 	\end{tabular}
 
 	\subsection{Kretsschema}
