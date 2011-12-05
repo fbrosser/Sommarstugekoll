@@ -19,7 +19,7 @@
 \title{Sommarstugekoll \\
 	Digital Konstruktion EDA234 \\ Grupp 2}
 \author{Fredrik Brosser, Karl Buchka, Andreas Henriksson, Johan Wolgers \\
-   Chalmers Tekniska Högskola \\\\
+   	Chalmers Tekniska Högskola \\
   	\texttt{	frebro @ student.chalmers.se }\\
 	\texttt{	karlbu @ student.chalmers.se }\\
 	\texttt{	henriksa @ student.chalmers.se }\\
@@ -88,25 +88,19 @@
 
 	En ren användarmanual finns bifogad i Appendix.
 
-\section{Systemspecifikation}
-
-{\noindent \bf Originalspecifikation} \\\\
-"Sommarstugekoll.\\
-
-Via telefon skall det gå att ringa upp enheten och få reda på temperaturen. 
-Vidare skall det gå att aktivera en eller flera av fyra funktioner (värmeelement som simuleras med ljusdioder). 
-För avläsning av temperatur används DS18S20." \\\\
-
-	\begin{tabular}{ l r}
-	   	Matningsspänning & +5V\\
-	   	Strömförbrukning & ~80mA\\
-	   	Temperaturmätspann & +/- 31.5 C\\
-		Temperaturupplösning & 0.5 C\\	
-	\end{tabular}
-
 \pagebreak
 
-\section{Systembeskrivning}
+\section{Systembeskrivning och -specifikation}
+
+	\subsection{Specifikation, Översikt}
+
+	Huvudfunktionen hos systemet är att användaren skall kunna ringa upp systemet och få inne- och utetemperaturen
+	uppläst. Sedan skall användaren kunna kontrollera på/av-status för ett antal olika funktioner. Temperaturen
+	läses av med hjälp av temperatursensorer och ges med en upplösning på +/- 0.5C i mätintervallet +/- 32.0C.
+	Kommandon till funktionsstyrningen ges via att användaren trycker motsvarande knapp på sin telefonknappsats.
+	Vidare finns även en fysisk, manuell knappsats på systemet för direkt styrning. Utöver att läsas upp i 
+	telefonen visas den aktuella temperaturen (binärt) på en LED-Display. Funktionsstatus samt ON/OFF för systemet
+	visas på lysdioder.
 
 	\subsection{Uppdelning}
 
@@ -135,22 +129,27 @@ För avläsning av temperatur används DS18S20." \\\\
 
 	Systemet bygger på DTMF-kommunikation (Dual Tone Multiple Frequency, Tonval). Telefonen skickar ut DTMF-signaler, som kan
 	läsas och avkodas av DTMF-avkodarkretsen, MT8880. DTMF-signaler består av två toner som tillsammans unikt ger vilken
-	siffra på telefonens knappsats som användaren tryckt på. DTMF-Mottagaren avkodar signalerna och skickar in den resulterande
+	siffra på telefonens knappsats som användaren tryckt på. Systemet börjar med att läsa upp ett antal ljudklipp med
+	aktuella temperaturer, och erbjuder sedan användaren möjligheten till att styra de externa funktionerna.
+DTMF-Mottagaren avkodar signalerna och skickar in den resulterande
 	datan till CPLD'n. Beroende på vilket kommando användaren gett beslutar CPLD'n vad som skall hända näst. Är kommandot ett
 	funktionskommand (Funktion på eller av) så sätter CPLD'n statusen för den specifika funktionen till det önskade. 
- 
 
 \section{Blockschema}
 
-	\begin{figure}[h!]
+	Se figurer ~\ref{fig:BlockDiagram1} och ~\ref{fig:BlockDiagram2}
+
+	\begin{figure}[ht!]
 	  \centering
 	      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD1.png}
+		\label{fig:BlockDiagram1}
 	  	\caption{Blockschema (CPLD1)}
 	\end{figure}
 
-	\begin{figure}[h!]
+	\begin{figure}[ht!]
 	  \centering
 	      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD2.png}
+		\label{fig:BlockDiagram2}
 	  	\caption{Blockschema (CPLD2)}
 	\end{figure}
 
@@ -158,7 +157,9 @@ För avläsning av temperatur används DS18S20." \\\\
 
 	\subsection{Dataväg}
 
-		
+Den huvudsakliga datavägen är för temperaturdatan som skickas från Temperaturmodulen till Ljudmodulen,
+för vidare uppläsning via Ljudlagringskretsen, ISD2560P. Denna data skickas aldrig genom, men kontrolleras av,
+Styrenheten. Den rena datavägen i systemet är alltså här begränsad till CPLD2.
 
 	\subsection{Styrenhet}
 
@@ -166,11 +167,14 @@ För avläsning av temperatur används DS18S20." \\\\
 
 Styrenheten kontrollerar och ger styrsignaler för att överse de övriga systemdelarna. Syftet är att ge en
 lätt överblick över hela körningscykeln, där styrenheten har kontrollen över funktionerna via en rad styr-,
-available- och acknowledgesignaler.
+available- och acknowledgesignaler. Styrenheten får även indata från knappsats och DTMF-mottagare via moduler
+som presenterar datan för styrenheten. Denna indata är skild från datavägen (temperaturinformation), och säger
+till styrenheten vad den ska göra härnäst, dvs. reagera på ett korrekt sätt på användarinput.
 
 {\noindent \bf Uppbyggnad}
 
-Styrenheten är i sin tur modulärt uppbyggd, och har ett väl avgränsat interface mot varje annan delmodul.
+Styrenheten är i sin tur modulärt uppbyggd, och har ett väl avgränsat interface mot varje annan delmodul, men
+fungerar samtidigt som en samordnare mellan de olika modulerna.
 
 {\noindent \bf Tillståndsmaskin}
 
@@ -197,11 +201,12 @@ Entrådsbussarna är anslutna till matningsspänning (+5V) genom ett pull-up-mot
 ändarna av bussen är anslutna till mastern (CPLD) och sensorn (DS18S20), respektive. Då bussen
 befinner sig i viloläge dras den hög ("svag drivning") av pull-up-motståndet. När information
 skickas över bussen drar den kommunicerande (sändande) enheten bussen låg genom att driva den
-med en stark logisk nolla.\\
+med en stark logisk nolla. Se figur ~\ref{fig:TempBus}\\
 
-	\begin{figure}[h!tb]
+	\begin{figure}[ht!tb]
 	  \centering
 	      \includegraphics[scale=1, angle=0]{TempBus.png}
+		\label{fig:TempBus}
 	  	\caption{Uppkoppling, Entrådsbuss}
 	\end{figure}
 
@@ -229,6 +234,8 @@ temperatursensorn skickas som LSB-först, och i 2-komplementsform.\\
 
 En läscykel består av fyra steg: Initialisering, Kommandon, Läsning och Viloläge.
 
+Se även figur ~\ref{fig:RCFlowChart} för en flödesdiagram-beskrivning av en komplett läscykel.
+
 Initialiseringen består i av att mastern driver bussen låg i 512 us, sedan släpper den.
 Temperatursensorn svarar med en närvaro-puls genom att driva bussen låg i 106 us, och därgenom bekräftar den sin närvaro
 på bussen och sin operationella status.
@@ -253,9 +260,10 @@ ger mastern på nytt en initieringspuls, som säger åt temperatursensorn att sl
 Den nyligen lästa temperaturen placeras av temperaturmodulen i CPLD'n (på CPLD2) på den interna temperaturbussen, och
 TAv sätts till 1 för att indikera att det finns korrekt data på bussen, enligt vad som efterfrågades av styrenheten.\\
 
-	\begin{figure}[h!tb]
+	\begin{figure}[ht!tb]
 	  \centering
 	      \includegraphics[scale=0.5, angle=0]{ReadCycleFlowChart.png}
+		\label{fig:RCFlowChart}
 	  	\caption{Högnivå-flödesdiagram för Temperaturläscykel}
 	\end{figure}
 
@@ -301,17 +309,20 @@ Internt använder temperaturmodulen ett antal olika räknare: \\
 För en uttömmande grafisk beskrivning av den interna tillståndsmaskinen som används av temperaturmodulen,
 se sektionen om tillståndsmaskiner.\\
 
-		\subsubsection{Kontrollfunktioner}
+		\subsubsection{Extern funktionsstyrning}
 
 {\noindent \bf Syfte}
 
 Funktionsmodulen är mycket enkelt uppbyggd, den tar emot data från Styrenheten och skickar vidare 
-uppdateringarna ut på de I/O-pinnar som används för funktionerna. 
+uppdateringarna ut på de I/O-pinnar som används för funktionerna. Sammanfattat fungerar den som ett
+mellansteg för att underlätta för styrenhetens funktionsstyrning, och kan vid behov byggas ut ytterligare
+för att implementera andra funktioner i systemet.
 
-		\subsubsection{Gränssnitt och Knappar}
+		\subsubsection{Fysiskt användargränssnitt och Knappsats}
 
 {\noindent \bf Syfte}
 
+Se även grafisk beskrivning av användargränssnittet ~\ref{fig:UserInterface}
 Systemet har, förutom DTMF-kontroll, även ett fysiskt gränssnitt med en knappsats samt en På/Av-Brytare för temperaturläsning.
 Dessa rådata måste formateras, avkodas och presenteras för styrenheten. Detta är Knappsatsmodulens uppgift.
 
@@ -324,7 +335,7 @@ styrenheten att den sett och mottagit datan från knappsatsen.
 \section{Tillståndsmaskiner}
 		\subsubsection{Styrenhet}
 		\subsubsection{Temperaturmodul}
-			\\(Refererar till tillståndsdiagramet för temperaturmodulen)\\
+			Se state-machine-diagram: ~\ref{fig:TempSM} och förklaring ~\ref{fig:SMExp}\\
 			{\bf Reset:} Alla signaler och räknare återställs till sina grundvärden.\\
 			{\bf Grundvärden:} Utgångspunkten är att alla signaler behåller sina gamla värden om inget annat anges.\\
 			\begin{tabular}{l}
@@ -350,15 +361,17 @@ styrenheten att den sett och mottagit datan från knappsatsen.
 				15: Läsning klar, lägg ut temperatur på buss och signallera valid data. Gå tillbaka till 0\\
 			\end{tabular}
 
-	\begin{figure}[h!tb]
+	\begin{figure}[ht!tb]
 	  \centering
 	      \includegraphics[scale=0.5, angle=0]{StateMachineExplained.png}
+		\label{fig:SMExp}
 	  	\caption{Förklaring till State Machine-diagram}
 	\end{figure}
 
-	\begin{figure}[h!tb]
+	\begin{figure}[ht!tb]
 	  \centering
 	      \includegraphics[scale=0.4, angle=0]{TempStateMachineDiagram.png}
+		\label{fig:TempSM}
 	  	\caption{Detaljerat State Machine-diagram för Temperaturläscykel}
 	\end{figure}
 
@@ -367,9 +380,10 @@ styrenheten att den sett och mottagit datan från knappsatsen.
 
 \section{Tidsdiagram}
 
-	\begin{figure}[h!tb]
+	\begin{figure}[ht!tb]
 	  \centering
 	      \includegraphics[scale=0.5, angle=0]{TempTiming.png}
+		\label{fig:TempTiming}
 	  	\caption{Timingdiagram för Temperaturmodulen}
 	\end{figure}
 
@@ -381,9 +395,9 @@ Då systemet hanterar avläsning av temperaturer och endast klarar ett begränsa
 görs här en felanalys (mätfel). För de tillämpningsområden systemet är konstruerat för (Hemanvändare) 
 är mätfelen dock för små för att ha betydelse.
 
-Temperatursensorerna arbetar med en temperaturupplösning på 0.5°C, och här fås alltså därför en oexakthet.
-Enligt temperatursensorns datablad gäller exaktheten på +/- 0.5°C i intervallet -10°C till +85°C.
-Systemet arbetar med ett temperaturspann på +/- 32°C, allt utanför intervallet representeras som maxtemperaturen.
+Temperatursensorerna arbetar med en temperaturupplösning på 0.5C, och här fås alltså därför en oexakthet.
+Enligt temperatursensorns datablad gäller exaktheten på +/- 0.5C i intervallet -10C till +85C.
+Systemet arbetar med ett temperaturspann på +/- 32C, allt utanför intervallet representeras som maxtemperaturen.
 
 Testning av temperaturavläsningen har gjorts under utvecklingsperioden genom att värma och kyla temperatursensorerna,
 och sensorerna visade de väntade resultaten, då jämförelser gjordes för inom- och utomhustemperatur kontrollerat med
@@ -394,7 +408,7 @@ termometrarna följer varandra bra, och det går inte att avgöra vilken som är
 Jämförelserna och resultaten presenteras i en tabell nedan: 
 
 	\begin{tabular}{l c r}
-		\\{\bf DS18S20} & {\bf Fönstertermometer} & {\bf Differens [°C]}\\
+		\\{\bf DS18S20} & {\bf Fönstertermometer} & {\bf Differens [C]}\\
 		4.5 & 5 & -0.5\\		
 		11 & 9 & 2\\		
 		18 & 18 & 0\\
@@ -407,37 +421,73 @@ Jämförelserna och resultaten presenteras i en tabell nedan:
 
 \section{Appendix}
 
-	\subsection{Komponentlista}
+	\subsection{Användarmanual och Gränssnitt}
+
+	För att använda systemet, koppla in det till en spänningskälla (+5V) och till en telefonlinje (RJ11).
+	När systemet är startat ska det startas om (Röd tryckknapp) och sedan initieras (Svart tryckknapp).
+	Efter detta är systemet redo att användas, och kommandon kan ges via telefon eller manuell knappsats.
+	När som helst kan systemet startas om helt genom att igen trycka på den röda tryckknappen.
+	Då systemet blir uppringt läses temperaturen upp, sedan kan kommandon ges från användaren enligt nedan:\\
+
+	{\bf Knappsats}\\
 	\begin{tabular}{l c r}
-		\\{\bf Namn} & {\bf Typ} & {\bf Beskrivning}\\
-		IC1 & XC9572XL & CPLD m. Styrenhet och DTMF-Avkodning\\
-		IC2 & XC9572XL & CPLD m. Temperaturavläsning och Ljudhantering 		
-		IC3 & DS18S20  & Temperatursensor A\\
-		IC4 & DS18S20  & Temperatursensor B\\
-		IC5 & MT8880C  & DTMF Transceiver\\
-		IC6 & ISD2560P & 60s. Ljudlagringskrets\\\\
-		R1-R2 & 4.7kOhm & Pull-Up-mostånd
-		R3 & 10kOhm & Pull-Up-mostånd
-		R4 & 15kOhm & Pull-Down-mostånd
-		R5-R18 & 1.5kOhm & LED-motstånd
-		SW1 & Switch & ON/OFF-Switch
-		LA & LED-Array & Temperatur-display
-		
+		\\{\bf Knapp} & {\bf Funktion}\\
+		1 & Funktion 1 PÅ\\		
+		2 & Funktion 2 PÅ\\		
+		3 & Funktion 3 PÅ\\
+		4 & Funktion 1 AV\\	
+		5 & Funktion 2 AV\\
+		6 & Funktion 3 AV\\		
+		A & Visa Innetemperatur\\
+		B & Visa Utetemperatur \\\\
 	\end{tabular}
+
+	{\bf Telefon}\\
+	\begin{tabular}{l c r}
+		\\{\bf Knapp} & {\bf Funktion}\\
+		1 & Funktion 1 PÅ\\		
+		2 & Funktion 2 PÅ\\		
+		3 & Funktion 3 PÅ\\
+		4 & Funktion 1 AV\\	
+		5 & Funktion 2 AV\\
+		6 & Funktion 3 AV\\
+		7 & Funktion 4 PÅ\\
+		8 & Funktion 4 AV\\		
+		9 & Visa Innetemperatur\\
+		0 & Visa Utetemperatur \\\\
+	\end{tabular}
+
+		\begin{figure}[ht!]
+		  \centering
+		      \includegraphics[scale=0.48, angle=0]{UserInterface.png}
+			\label{fig:UserInterface}
+		  	\caption{Knapplayout, Knappsats resp. Telefon}
+		\end{figure}
+
+	\subsection{Komponentlista}
 
 	\subsection{Kretsschema}
 
+		\begin{tabular}{ l r}
+		   	Matningsspänning & +5V\\
+		   	Strömförbrukning & ~80mA\\
+		   	Temperaturmätspann & +/- 31.5 C\\
+			Temperaturupplösning & 0.5 C\\	
+		\end{tabular}
+
 	\subsection{Pin-Layout}
 
-		\begin{figure}[h!]
+		\begin{figure}[ht!]
 		  \centering
 		      \includegraphics[scale=0.48, angle=0]{PinDiagram.png}
+			\label{fig:Pin1}
 		  	\caption{Pin-Konfiguration (CPLD1)}
 		\end{figure}
 
-		\begin{figure}[h!]
+		\begin{figure}[ht!]
 		  \centering
 		      \includegraphics[scale=0.48, angle=0]{PinDiagram.png}
+			\label{fig:Pin1}
 		  	\caption{Pin-Konfiguration (CPLD2)}
 		\end{figure}
 
