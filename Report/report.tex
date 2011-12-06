@@ -7,6 +7,7 @@
 \usepackage{rotating}
 \usepackage{listings}
 \usepackage{color}
+\usepackage{appendix}
 
 % Swedish
 \usepackage[swedish]{babel}
@@ -29,12 +30,14 @@
 	}
 
 \maketitle
+ \thispagestyle{empty}
+\pagebreak
+ \thispagestyle{empty}
+	\tableofcontents
+ \thispagestyle{empty}
 
 \pagebreak
 
-\tableofcontents
-
-\pagebreak
 
 \begin{center}
 	{\noindent \bf Sammanfattning}
@@ -65,21 +68,22 @@ En tänkt tillämpning för produkten:
 	of in- and outdoor temperatures - when the previously mentioned summer house owner wishes to make a visit, he simply dials the
 	summer house telephone number giving it instructions to bring the temperature up to a comfortable level, all while he makes
 	the drive up. Simple - smart - elegant - Sommarstugekoll is the domestic temperature automation assistant of the future!
-
+ \thispagestyle{empty}
 \pagebreak
 
+\setcounter{page}{1}
 \section{Introduktion}
 
 	Konstruktionsprojektet utförs inom kursen ``Digital Konstruktion, EDA234'' vid Chalmers Tekniska Högskola. Uppgiften består att inom gruppen om 4 personer konstruera och dokumentera
 	ett digitalsystem utifrån en specifikation, med fokus låg på huvudfunktionalitet i det digitala området. Utvecklingen sker på ett färdigt utvecklingskort vilket sedan kompletteras med externa kretsar och programmeras för att nå kravspecefikationen. Logikkretsen som används är en Xilinx XC9572XL CPLD, och utveckligen sker i huvudsak med VHDL i Xilinx ISE-miljön samt i ModelSim för simuleringar. Rapporten är uppdelad i abstraktionslager med fördjupningar i de senare avsnitten. 
 
-	En handhavandeinstruktion återfinns bifogad i \ref{sec:Användarmanual och Gränssnitt}.
+	En handhavandeinstruktion återfinns bifogad i Appendix~\ref{sec:Manual}.
 
 \pagebreak
 
-\section{Systembeskrivning och -specifikation}
-
-	\subsection{Specifikation}
+\section{Kravspecifikation och systembeskrivning}
+	Kravspecifikation från kurs PM ``Via telefon skall det gå att ringa upp enheten och få reda på temperaturen. vidare skall det gå att aktivera en eller flera av fyra funktioner (värmeelement som simuleras av ljusdioder). För avläsning av temperatur används DS18S20''
+	\subsection{Kravspec}
 
 	Huvudfunktionen hos systemet är att användaren skall kunna ringa upp systemet och få inne- och utetemperaturen
 	uppläst. Sedan skall användaren kunna kontrollera på/av-status för ett antal olika funktioner. Temperaturen
@@ -452,11 +456,17 @@ Jämförelserna och resultaten presenteras i en tabell nedan:
 	\end{tabular}
 
 \pagebreak
-{\bf \huge Appendix}
+% {\bf \huge Appendix}
 
 	\appendix
-	\section{Användarmanual och Gränssnitt}
+	\renewcommand{\appendixpagename}{Appendix}
+	\appendixpage
+	\renewcommand{\appendixtocname}{Appendix}
 
+	\addappheadtotoc
+
+	\section{Användarmanual och Gränssnitt}
+	\label{sec:Manual}
 	För att använda systemet, koppla in det till en spänningskälla (+5V) och till en telefonlinje (RJ11).
 	När systemet är startat ska det startas om (Röd tryckknapp) och sedan initieras (Svart tryckknapp).
 	Efter detta är systemet redo att användas, och kommandon kan ges via telefon eller manuell knappsats.
@@ -468,12 +478,12 @@ Jämförelserna och resultaten presenteras i en tabell nedan:
 			{\bf Knappsats}\\
 			\begin{tabular}{l c r}
 				\\{\bf Knapp} & {\bf Funktion}\\
-				1 & Funktion 1 PÅ\\		
-				2 & Funktion 2 PÅ\\		
-				3 & Funktion 3 PÅ\\
-				4 & Funktion 1 AV\\	
-				5 & Funktion 2 AV\\
-				6 & Funktion 3 AV\\		
+				1 & Funktion 1 TILL\\		
+				2 & Funktion 2 TILL\\		
+				3 & Funktion 3 TILL\\
+				4 & Funktion 1 FRÅN\\	
+				5 & Funktion 2 FRÅN\\
+				6 & Funktion 3 FRÅN\\		
 				A & Visa Innetemperatur\\
 				B & Visa Utetemperatur \\\\
 			\end{tabular}
@@ -484,12 +494,12 @@ Jämförelserna och resultaten presenteras i en tabell nedan:
 			{\bf Telefon}\\
 			\begin{tabular}{l c r}
 				\\{\bf Knapp} & {\bf Funktion}\\
-				1 & Funktion 1 PÅ\\		
-				2 & Funktion 2 PÅ\\		
-				3 & Funktion 3 PÅ\\
-				4 & Funktion 1 AV\\	
-				5 & Funktion 2 AV\\
-				6 & Funktion 3 AV\\
+				1 & Funktion 1 TILL\\		
+				2 & Funktion 2 TILL\\		
+				3 & Funktion 3 TILL\\
+				4 & Funktion 1 FRÅN\\	
+				5 & Funktion 2 FRÅN\\
+				6 & Funktion 3 FRÅN\\
 				9 & Visa Innetemperatur\\
 				0 & Visa Utetemperatur \\\\
 			\end{tabular}
