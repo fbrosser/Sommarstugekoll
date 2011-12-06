@@ -44,3 +44,5 @@
 _*
 vlog*
 vopt*
+*.gz
+*synctex*
