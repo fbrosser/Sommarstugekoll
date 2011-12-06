@@ -40,18 +40,14 @@
 	{\noindent \bf Sammanfattning}
 \end{center}
 
-	Systemet som beskrivs i denna rapport är ett automatiserat temperaturkontrollsystem som är åtkomstbart och styrbart via
-	telefon (DTMF). Systemets huvudfunktionalitet är att informera användaren om de aktuella temperaturerna som läses från
-	två anslutna temperatursensorer, och att ge användaren möjlighet att på avstånd styra (av/på) ett antal externa funktioner,
-	såsom exempelvis värmeelement. Information och kontrolldata utbytes genom en vanlig analog telefonlinje, med hjälp av DTMF:
-	Dual Tone Multiple Frequency. 
+	Ett system för temperaturavläsning och relästyrning beskrivs genom denna rapport. Systemet är åtkomligt och styrbart via telefon genom DTMF (Dual Tone Multiple Frequency). Systemets funktion består i att informera användaren om aktuella temperaturer från två temperatursensorer samt ge användaren möjlighet att via telefon styra utgångarna (till/från) för exempelvis värmeelement eller belysning. Styrning och återkoppling utbytes genom en telefonlinje, POTS (Plain Old Telephone Service) med hjälp av DTMF.
 
-	Ett särskilt exempel på användningsområde är kontroll av uppvärmningen i en sommarstuga. Med hjälp av systemet kan man
-	undvika att temperaturen sjunker under en viss gräns, vilket skulle kunna få konsekvenser såsom att rör fryser. Genom att
-	hålla temperaturen på en lämplig nivå kan man undvika oönskade konsekvenser samtidigt som man minimerar uppvärmningskostnader.
-	'Sommarstugekoll' löser detta problem genom att erbjuda ett enkelt sätt att hålla koll på och kontrollera inom- och utomhustemperaturer.
-	Om ägaren till en sommarstuga vill göra ett besök ringer han/hon helt enkelt upp sommarstugan och slår på lämpliga element, så att
-	sommarstugan hinner värmas till en behaglig temperatur medans ägaren kör dit.
+En tänkt tillämpning för produkten:
+\begin{list}{*}{}
+\item Systemet inkopplas innan avfärd från sommarstugan och befinner sig i viloläge. 
+\item Användaren kan då denne önskar ringa upp systemet som på anmodan returnerar temperatur från någon av temperaturgivarna.
+\item Användaren kan sedan genom sin knapptelefon aktivera eller avaktivera någon av utgångarna för att på så sätt slå till värme, belysning eller vad som anslutits till funktionsutgångarna.
+\end{list}
 
 \begin{center}
 	{\noindent \bf Abstract}
@@ -74,14 +70,10 @@
 
 \section{Introduktion}
 
-	Konstruktionsprojektet har utförts inom ramarna för kursen "Digital Konstruktion EDA234" vid Chalmers Tekniska Högskola.
-	Uppgiften var att inom gruppen (4 personer) relativt självständigt (med stöd från handledare) konstruera och dokumentera
-	ett digital system utifrån en vag specifikation, där fokus låg på huvudfunktionaliteten.
-	Utvecklingen har skett med hjälp av ett färdigt baslaborationskort som sedan byggts på med externa kretsar för den funktionalitet
-	som specifierats. Logikkretsen som har använts är en Xilinx XC9572XL CPLD, och utveckligen har i huvudsak skett i VHDL och Xilinx ISE-miljön,
-	samt i ModelSim för simuleringar. Denna rapport är uppdelad i flera olika abstraktionslager för att passa läsaren och dennes specifika intresseområden. 
+	Konstruktionsprojektet utförs inom kursen ``Digital Konstruktion, EDA234'' vid Chalmers Tekniska Högskola. Uppgiften består att inom gruppen om 4 personer konstruera och dokumentera
+	ett digitalsystem utifrån en specifikation, med fokus låg på huvudfunktionalitet i det digitala området. Utvecklingen sker på ett färdigt utvecklingskort vilket sedan kompletteras med externa kretsar och programmeras för att nå kravspecefikationen. Logikkretsen som används är en Xilinx XC9572XL CPLD, och utveckligen sker i huvudsak med VHDL i Xilinx ISE-miljön samt i ModelSim för simuleringar. Rapporten är uppdelad i abstraktionslager med fördjupningar i de senare avsnitten. 
 
-	En ren användarmanual finns bifogad i Appendix A.
+	En handhavandeinstruktion återfinns bifogad i \ref{sec:Användarmanual och Gränssnitt}.
 
 \pagebreak
 
