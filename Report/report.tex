@@ -82,10 +82,15 @@ En tänkt tillämpning för produkten:
 \pagebreak
 
 \section{Kravspecifikation och systembeskrivning}
-	Kravspecifikation från kurs PM ``Via telefon skall det gå att ringa upp enheten och få reda på temperaturen. vidare skall det gå att aktivera en eller flera av fyra funktioner (värmeelement som simuleras av ljusdioder). För avläsning av temperatur används DS18S20''
-	\subsection{Kravspec}
+	Systemet består av en styrenhet placerad på två CPLD med anslutning till telefonnätet. Sytrenheten har med hjälp av en DTMF avkodare möjlighet att tolka användarens telefonknapptryckningar på distans. Viadare kan användaren genom dessa knapptryckningar skicka signal för att hämta datavärde från någon av de två temperaturgivarna anslutna med entrådsbus, en röstenhet läser sedan upp ett förinspelat värde för respektive temperatur. Vidare kan användaren också starta eller stoppa någon av de funktionsutgångar som finns till hands, användaren får då akustisk återkoppling om aktuell status för funktionsutgången via samma ljudmodul. 
 
-	Huvudfunktionen hos systemet är att användaren skall kunna ringa upp systemet och få inne- och utetemperaturen
+	\subsection{Tolkning och defenition av kravspecifikation}
+
+	Inom det tilltänkta användningsområdet, ett fritidshus med POTS-linje som under större delen av året endast nyttjas tillfälligtvis, är det rimligt med en temperatur om $5-10\,^{\circ}\mathrm{C}$ då ingen vistas i huset. Vidare bör det vara önskvärt att ha möjlighet att slå till normal värme innan ett besök, kunna kontrollera att det blivit varmt samt att kontrollera att temperaturen är över $0\,^{\circ}\mathrm{C}$. Systemet kan därför tolka en temperatur om $\pm 32\,^{\circ}\mathrm{C}$ från givarna med en upplösning om $\pm 1\,^{\circ}\mathrm{C}$.
+
+Systemet matas med en spänning om $5\,V$ DC
+
+	Systemets funktion består i att användaren skall kunna ringa upp systemet och få inne- och utetemperaturen
 	uppläst. Sedan skall användaren kunna kontrollera på/av-status för ett antal olika funktioner. Temperaturen
 	läses av med hjälp av temperatursensorer och ges med en upplösning på +/- 0.5C i mätintervallet +/- 32.0C.
 	Kommandon till funktionsstyrningen ges via att användaren trycker motsvarande knapp på sin telefonknappsats.
