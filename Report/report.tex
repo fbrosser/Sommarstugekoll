@@ -211,9 +211,8 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter vilka nedan pre
 
 	Temperaturmodulen kommunicerar seriellt med temperatursensorn över en entrådsbuss.
 	Entrådsbussen är ansluten till matningsspänning (+5V) genom ett pull-up-motstånd på 4.7kOhm, och
-	ändarna av bussen är anslutna till mastern (CPLD) och sensorn (DS18S20), respektive. Då bussen
-	befinner sig i viloläge dras den hög ("svag drivning") av pull-up-motståndet. När information
-	skickas över bussen drar den kommunicerande (sändande) enheten bussen låg genom att driva den
+	ändarna av bussen är anslutna till mastern (CPLD) och sensorn (DS18S20), respektive. När information
+	skickas över bussen drar den sändande enheten bussen låg genom att driva den
 	med en stark logisk nolla.
 
 	\subsubsection{Läscykel}
@@ -225,9 +224,8 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter vilka nedan pre
 	Initialiseringen består i av att mastern driver bussen låg i 512 us, sedan släpper den.
 	Temperatursensorn svarar då med en närvaro-puls genom att driva bussen låg i 106 us.
 
-	Då mastern detekterat närvaropulsen börjar den överföra ett ROM-kommando (Skip ROM, 0xCC), följt av en kort återhämtningslucka och sedan ett Funktions-kommando (Convert Temperature, 0x44), enligt läs-/skriv-luckemetoden som beskrivits ovan.
-	Skip-ROM-kommandot används i det här systemet eftersom endast en temperatursensor används per entrådsbuss.
-	Därmed finns inget behov av att kunna addressera specifika sensorer på bussen.
+	Då mastern detekterat närvaropulsen börjar den överföra ett ROM-kommando (Skip ROM, 0xCC), följt av en kort återhämtningslucka och sedan ett Funktions-kommando (Convert Temperature, 0x44).
+	Skip-ROM-kommandot används i det här systemet, endast en temperatursensor används per entrådsbuss, därmed finns inget behov av att kunna addressera specifika sensorer på bussen.
 	Då Convert Temperature-kommandot ges gör DS18S20-kretsen en temperaturkonvertering, för att sedan spara den lästa temperaturdatan i ett internt 9-bytes minne.
 	Under konverteringsperioden (upp till 750 ms) kan mastern göra polling av temperatursensorns status. Detta innebär att mastern kontinuerligt
 	sänder förfrågningar genom att dra bussen låg i en kort period (4 us). Temperatursensorn svarar med en nolla
@@ -238,8 +236,8 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter vilka nedan pre
 	Mastern går då in i läsningsläget och börjar sampla datan på bussen genom att driva bussen låg, släppa den och sampla efter 4 us.
 	Mastern samplar de första åtta bitarna data som sänds av DS18S20, sedan en ytterligare, nionde bit. 
 	Den sista biten utgör en tecken-bit för att avgöra om temperaturen är positiv eller negativ. Då den nionde biten data lästs
-	ger mastern på nytt en initieringspuls, som säger åt temperatursensorn att sluta sända data.
-	Den nyligen lästa temperaturen placeras på den interna temperaturbussen, och temperaturmodulen signallerar till styrenheten att giltig data finns på bussen.
+	ger mastern på nytt en initieringspuls för att avbryta läsningen.
+	Den nyligen lästa temperaturen placeras på den interna temperaturbussen, och temperaturmodulen signalerar till styrenheten att giltig data finns på bussen.
 
 		\begin{figure}[ht!tb]
 		  \centering
@@ -296,23 +294,22 @@ styrenheten att den sett och mottagit datan från knappsatsen.
 
 	\subsection{DS18S20}
 	\label{DS18S20}
+		\colorbox{yellow}{Korta ner ännu mer?}
 		Den temperatursensor som används är Maxim DS18S20, som ger temperaturmodulen möjlighet att läsa av temperaturen
-		med nio (9) bitars upplösning. Sensorerna som användas i detta system drivs av en extern spänningskälla på +5V,
-		och kommunicerar seriellt över en entrådsbuss. Seriekommunikationen baserar på att bus-mastern initierar skriv-
-		och läs-luckor. Varje sådan lucka är mellan 60 och 120 us lång. Temperatursensorn initieras genom att mastern
-		driver bussen låg i åtminstone 480 us, vilket följs av att temperatursensorkretsen själv drar bussen låg i 60-240 us,
-		efter en återhämtningslucka på minst 1 us. Efter initieringen väntar sensorkretsen på ett ROM-kommando från mastern,
+		med nio (9) bitars upplösning. Sensorerna som används i detta system drivs av en extern spänningskälla på +5V,
+		och kommunicerar seriellt över en entrådsbuss. Seriekommunikationen baseras på att bus-mastern initierar skriv-
+		och läs-luckor. Mellan varje skriv- eller läslucka finns en kort återhämtningsperiod. Temperatursensorn initieras genom att mastern
+		driver bussen låg, vilket följs av att temperatursensorkretsen driver för att signalera närvaro.
+		Efter initieringen väntar sensorkretsen på ett ROM-kommando från mastern,
 		följt av ett Funktions-kommando. Varje sådant kommando är en byte lång, och skickas som LSB-först. Mastern skickar
 		en logisk nolla genom att driva bussen låg under hela skrivluckan. En etta skickas genom att mastern driver bussen låg
-		under en kort period, 1-15us, och sedan släpper bussen under resten av skrivluckans längd. Mellan varje skriv- eller läslucka
-		måste det finnas en återhämtningsperiod på minst 1us.
+		under en kort del av skrivluckan och sedan släpper bussen under resten av skrivluckans längd. 
 
 		Då mastern är klar med att skicka över ROM- och Funktions-kommando, kan (beroende på vilka kommandon som sändes) DS18S20-kretsen
-		svara med aktuell data. På samma sätt som ovan måste mastern här initiera en läs-lucka genom att driva bussen låg i 1-8us, och
-		sedan släppa den (högimpediv). DS18S20-kretsen svarar på den allokerade läs-luckan genom att antingen hålla bussen låg för att
-		överföra en nolla, eller genom att låta bussen dras hög av pull-up-motståndet för en etta. Under den här tiden (upp till 15 us
-		efter att ha släppt bussen) kan mastern sampla bussen för att läsa av vad DS18S20-kretsen skickat. All data som skickas från
-		temperatursensorn skickas som LSB-först, och i 2-komplementsform.\\
+		svara med aktuell data. På samma sätt som ovan måste mastern här initiera en läs-lucka. 
+		DS18S20-kretsen svarar på den allokerade läs-luckan och överför etta eller nolla. Mastern då sampla bussen för att läsa av vad DS18S20-kretsen skickat. All data som skickas från
+		temperatursensorn skickas som LSB-först och i 2-komplementsform. För exakta tidskrav, se datablad.
+		\colorbox{yellow}{Hänvisning till datablad?}\\
 
 	\subsection{MT8880C}
 	\label{MT8880C}
@@ -330,18 +327,18 @@ Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms ef
 			{\bf Reset:} Alla signaler och räknare återställs till sina grundvärden.\\
 			{\bf Grundvärden:} Utgångspunkten är att alla signaler behåller sina gamla värden om inget annat anges.\\
 			\begin{tabular}{l}
-				\\{\bf Viloläge (Tillstånd 0):}\\
-				0: Viloläge och återställningspunkt. Inväntar TRd = 1 från Styrenheten\\
-				{\bf Initialisering (Tillstånd 1-3):}\\
-				1: Fördröjningstillstånd, väntar på puls på DelayLong (512 us)\\
+				\\{\bf Viloläge (tillstånd 0):}\\
+				0: Viloläge och återställningspunkt. inväntar tRd = 1 från styrenheten\\
+				{\bf Initialisering (tillstånd 1-3):}\\
+				1: Fördröjningstillstånd, väntar på puls på delayLong (512 us)\\
 				2: Mastern driver bussen låg i 512 us och sätter datavärdet till 0xCC (Skip ROM)\\
 				3: Mastern släpper bussen, DS18S20 skickar närvaropuls\\
-				{\bf Kommandoöverföring (Tillstånd 4-8):}\\
+				{\bf Kommandoöverföring (tillstånd 4-8):}\\
 				4: Förberedelsetillstånd före sändning\\
 				5: Huvudsändningstillståndet, mastern sänder bit enligt aktuellt räknarvärde\\
 				6: Mellanbittillstånd, återhämtningstillständ. Fortsätter om fler bitar ska skickas\\
 				7: Avgör om DS18S20 är upptagen med att konvertera temperaturen. Om så, vänta tills klar\\
-				8: Vägskälstillstånd. Om vi har fler kommandon att skicka, gå tillbaka, annars börja läsa\\
+				8: Vägskälstillstånd. Om fler kommandon kvar att skicka, gå tillbaka, annars börja läsa\\
 				{\bf Läsning (Tillstånd 9-15):}\\
 				9:  Förberedelsetillstånd före läsning\\
 				10: Mastern initierar en läslucka genom att dra bussen låg i 4 us\\
@@ -349,7 +346,7 @@ Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms ef
 				12: Mastern samplar bussen. Om DS18S20 skickar en nolla hålls bussen låg, annars inte\\
 				13: Återhämtningstillstånd mellan samplingar\\
 				14: Vägskälstillstånd. Om vi har fler bitar att läsa, gå tillbaka, annars gå vidare\\
-				15: Läsning klar, lägg ut temperatur på buss och signallera valid data. Gå tillbaka till 0\\
+				15: Läsning klar, lägg ut temperatur på buss och signalera giltig data. Gå tillbaka till 0\\
 			\end{tabular}
 
 	\begin{figure}[ht!tb]
@@ -363,7 +360,7 @@ Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms ef
 	  \centering
 	      \includegraphics[scale=0.4, angle=0]{TempStateMachineDiagram.png}
 		\label{fig:TempSM}
-	  	\caption{Detaljerat State Machine-diagram för Temperaturläscykel}
+	  	\caption{Detaljerat State Machine-diagram för temperaturläscykel}
 	\end{figure}
 
 		\subsection{DTMF-Modul}
@@ -491,45 +488,42 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 		\\{\bf Signal} & {\bf Från} & {\bf Till} & {\bf Beskr.}\\ \\
 		clk & Extern & Allt & Global Klocksignal\\
 		rst & Extern & Allt & Global Resetsignal\\
-		Buttons[3..0] & Knappsats & Knappsatsmodul & Indatavektor\\
-		KBDav & Knappsats & Knappsatsmodul & Availablesignal\\
-		FuncData[3..0] & Funktionsmodul & FunktionsLEDs & Funktionsstyrning\\
-		DTMFData[3..0] & DTMF-Modul & MT8880 & Databuss till MT8880 (bidir.)\\
+		buttons[3..0] & Knappsats & Knappsatsmodul & Indatavektor\\
+		kbDav & Knappsats & Knappsatsmodul & Availablesignal\\
+		funcData[3..0] & Funktionsmodul & FunktionsLEDs & Funktionsstyrning\\
+		dtmfData[3..0] & DTMF-Modul & MT8880 & Databuss till MT8880 (bidir.)\\
 		\(\Phi\)2 & DTMF-Modul & MT8880 & Klocksignal till MT8880\\
-		R/W & DTMF-Modul & MT8880 & Read/Write till MT8880\\
-		RS0 & DTMF-Modul & MT8880 & Intieringssignal till MT8880\\
-		IRQ & MT8880 & DTMF-Modul & Interruptsignal från MT8880\\
+		r/w & DTMF-Modul & MT8880 & Read/Write till MT8880\\
+		rs0 & DTMF-Modul & MT8880 & Intieringssignal till MT8880\\
+		irq & MT8880 & DTMF-Modul & Interruptsignal från MT8880\\
 
-		KData[3..0] & Knappsatsmodul & Styrenhet & Data från knappsatsmodul\\
-		KAv & Knappsatsmodul & Styrenhet & Availablesignal från knappsatsmodul\\
-		KAck & Styrenhet & Knappsatsmodul & Ack. till knappsatsmodul\\
+		kData[3..0] & Knappsatsmodul & Styrenhet & Data från knappsatsmodul\\
+		kAv & Knappsatsmodul & Styrenhet & Availablesignal från knappsatsmodul\\
+		kAck & Styrenhet & Knappsatsmodul & Ack. till knappsatsmodul\\
 
-		TSel & Styrenhet & Temperaturmodul & Sensorselectsignal\\
-		TRd & Styrenhet & Temperaturmodul & Read-signal (starta läsning)\\
-		TAv & Temperaturmodul & Styrenhet & Availablesignal, valid data\\
+		tSel & Styrenhet & Temperaturmodul & Sensorselectsignal\\
+		tRd & Styrenhet & Temperaturmodul & Read-signal (starta läsning)\\
+		tAv & Temperaturmodul & Styrenhet & Availablesignal, valid data\\
 
-		SData[3..0] & Styrenhet & Ljudmodul & Ljudadressbuss\\
-		SSel & Styrenhet & Ljudmodul & Selectsignal för temperatur/ljud\\
-		SPlay & Styrenhet & Ljudmodul & Play-signal (spela ljud)\\
-		SDone & Ljudmodul & Styrenhet & Signallerar uppspelning färdig\\
+		sData[3..0] & Styrenhet & Ljudmodul & Ljudadressbuss\\
+		sSel & Styrenhet & Ljudmodul & Selectsignal för temperatur/ljud\\
+		sPlay & Styrenhet & Ljudmodul & Play-signal (spela ljud)\\
+		sDone & Ljudmodul & Styrenhet & signalerar uppspelning färdig\\
 
-		DData[3..0] & DTMF-Modul & Styrenhet & DTMF-Databuss\\
-		DAv & DTMF-Modul & Styrenhet & Availablesignal från DTMF-Modul\\
-		DAck & Styrenhet & DTMF-Modul & Acknowledgement från Styrenhet\\
+		dData[3..0] & DTMF-Modul & Styrenhet & DTMF-Databuss\\
+		dAv & DTMF-Modul & Styrenhet & Availablesignal från DTMF-Modul\\
+		dAck & Styrenhet & DTMF-Modul & Acknowledgement från Styrenhet\\
 
-		FData[3..0] & Styrenhet & Funktionsmodul & Funktionsstatusbuss\\
+		fData[3..0] & Styrenhet & Funktionsmodul & Funktionsstatusbuss\\
 
-		SP+ & ISD250P & MT8880 & Analog ljudsignal (+)\\
-		SP- & ISD250P & MT8880 & Analog ljudsignal (-)\\
+		dq0 & Temperaturmodul & DS18S20 & Seriell 1-trådsbuss (bidir.)\\
+		dq1 & Temperaturmodul & DS18S20 & Seriell 1-trådsbuss (bidir.)\\
 
-		DQ0 & Temperaturmodul & DS18S20 & Seriell 1-trådsbuss (bidir.)\\
-		DQ1 & Temperaturmodul & DS18S20 & Seriell 1-trådsbuss (bidir.)\\
+		temp[7..0] & Temperaturmodul & Ljudmodul & Temperaturdatabuss\\
 
-		Temp[7..0] & Temperaturmodul & Ljudmodul & Temperaturdatabuss\\
-
-		Addr[4..0] & Ljudmodul & ISD2560P & Adressbuss till ISD2560P\\
-		CE & Ljudmodul & ISD2560P & Chip-Enable från ljudmodul\\
-		EOM & IDS2560P & Ljudmodul & End-Of-Message från ISD2560P\\\\
+		addr[4..0] & Ljudmodul & ISD2560P & Adressbuss till ISD2560P\\
+		ce & Ljudmodul & ISD2560P & Chip-Enable från ljudmodul\\
+		eom & IDS2560P & Ljudmodul & End-Of-Message från ISD2560P\\\\
 	\end{tabular}
 
 	\section{Arbetsfördelning}
