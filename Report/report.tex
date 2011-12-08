@@ -100,25 +100,28 @@ Funktionsutgångarna kan också styras lokalt med med bifogade knappsatsen. Aktu
 	Nedan följer en sammanfattande tabell över hur de olika modulerna är uppdelade på de två CPLD:erna. Varje modul är mer
 	utförligt beskriven i respektive sektion under rubriken ~\ref{sec:Funktionsenheter} \nameref{sec:Funktionsenheter}. 
 
-	I blockschema som återfinns i figur ~\ref{fig:blockschema1} och ~\ref{fig:blockschema2} visas respektive modul och uppdelningen på två CPLD samt dess kommunikationsvägar. \\\\
+	I blockschema som återfinns i figur~\ref{fig:blocks1} och~\ref{fig:blocks2} visas respektive modul och uppdelningen på två CPLD samt dess kommunikationsvägar. I tabell~\ref{tab:uppdelningstabell} förklaras respektive modul samt vilken CPLD som innehåller denna.\\\\
 
 	\begin{figure} [H]
-		  \centering
-		      \includegraphics[width=1\textwidth]{BlockDiagramCPLD1.png}
-			\label{fig:blockschema1}
+		  	
+			\centering
+			\includegraphics[width=1\textwidth]{BlockDiagramCPLD1.png}
 		  	\caption{Blockdiagram för CPLD1}
+			\label{fig:blocks1}
 	\end{figure}
 
 	\begin{figure}[H]
-		  \centering
-		      \includegraphics[width=1\textwidth]{BlockDiagramCPLD2.png}
-			\label{fig:blockschema2}
-		  	\caption{Blockdiagram för CPLD2}
+		  	
+			\centering
+			\includegraphics[width=1\textwidth]{BlockDiagramCPLD2.png}
+			\caption{Blockdiagram för CPLD2}
+			\label{fig:blocks2}
 	\end{figure}
 
 	\begin{table} [H]
+		
+		\caption{Respektive CPLD's moduler och uppgifter} 
 		\label{tab:uppdelningstabell}
-		\caption{Tabell över CPLD och respektive uppgifter} 
 	\begin{tabular}{l l}
 		
 		{\bf CPLD1} \\
@@ -140,99 +143,50 @@ Funktionsutgångarna kan också styras lokalt med med bifogade knappsatsen. Aktu
 	% \end{label}
 	\end{table}
 	
+	Systemet är uppdelat enligt ``dataväg-styrenhet-modellen'', där designprincipen går ut på att skilja styrsignaler
+	och dataflödeskontroll (Styrenheten) från datan som forslas genom systemet (Datavägen). Systemet skickar temperaturdata från temperaturmodulen till ljudmodulen samt adressdata till ljludlagringsenheten från ljudmodulen. Detta flöde kontrolleras från styrenheten via
+	enkla styrsignaler. Viss data, i form av indata från användargränssnitt och styrsignaler till funktionsutgångar, passerar dock genom styrenheten.
+
+	\subsection{Arbetsflöde}
+
+I sitt viloläge väntar systemet på inkommande samtal. Då samtal mottages börjar systemet börjar med att läsa upp ett antal ljudklipp med aktuella temperaturer, och erbjuder sedan användaren möjligheten till att styra de externa funktionerna. Telefonen skickar ut DTMF-signaler, som läses och avkodas av DTMF-transceivern, MT8880, vilken avkodar tvåtonssignalerna för att unikt identifierna nedtryckt knapp och sänder ut denna på databussen till DTMF-modulen. 
+
+Då användaren nedtrycker en knapp sker följande. Motsvarar knapptryckningen ett funktionskommando (funktion till eller från) så sätter CPLD'n statusen för respektive funktionsutgång. \colorbox{yellow}{Lägg eventuellt in andra knapptryckningar som kan motsvara kommandon här}
 
 
 
-
-	Systemet är uppdelat enligt dataväg-styrenhet-modellen, där designprincipen går ut på att skilja styrsignaler
-	och dataflödeskontroll (Styrenheten) från själva datan som forslas genom systemet (Datavägen). Den data som
-	skickas inom systemet är i första hand temperaturdata från temperaturmodulen till ljudmodulen, och ljud som
-	lagras på den externa ljudlagringskretsen och hanteras av ljudmodulen. Detta flöde kontrolleras från styrenheten via
-	enkla styrsignaler. Viss data, i form av indata från användargränssnitt och utdata till funktionsstatus, passerar
-	dock genom styrenheten.
-
-	\subsection{Översikt}
-
-	Systemet bygger på DTMF-kommunikation (Dual Tone Multiple Frequency, Tonval). Telefonen skickar ut DTMF-signaler, som kan
-	läsas och avkodas av DTMF-avkodarkretsen, MT8880. DTMF-signaler består av två toner som tillsammans unikt ger vilken
-	siffra på telefonens knappsats som användaren tryckt på. Systemet börjar med att läsa upp ett antal ljudklipp med
-	aktuella temperaturer, och erbjuder sedan användaren möjligheten till att styra de externa funktionerna.
-	DTMF-Mottagaren avkodar signalerna och skickar in den resulterande
-	datan till CPLD'n. Beroende på vilket kommando användaren gett beslutar CPLD'n vad som skall hända näst. Är kommandot ett
-	funktionskommand (Funktion på eller av) så sätter CPLD'n statusen för den specifika funktionen till det önskade. 
-
-	\subsection{Blockschema}
-
-	Se figurer i Appendix ~\ref{fig:BlockDiagram1} och ~\ref{fig:BlockDiagram2}
-
-	\begin{figure}[ht!]
-	  \centering
-	      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD1.png}
-		\label{fig:BlockDiagram1}
-	  	\caption{Blockschema (CPLD1)}
-	\end{figure}
-
-	\begin{figure}[ht!]
-	  \centering
-	      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD2.png}
-		\label{fig:BlockDiagram2}
-	  	\caption{Blockschema (CPLD2)}
-	\end{figure}
 
 \section{Funktionsenheter}
 \label{sec:Funktionsenheter}
+Systemet är som tidigare nämnt uppdelat i sex funktionsenheter vilka nedan presenteras närmare.
+
 	\subsection{Dataväg}
-
-	\subsubsection{Modulbeskrivning}
-
-	Den huvudsakliga datavägen är för temperaturdatan som skickas från Temperaturmodulen till Ljudmodulen,
-	för vidare uppläsning via Ljudlagringskretsen, ISD2560P. Denna data skickas aldrig genom, men kontrolleras av,
-	Styrenheten. Den rena datavägen i systemet är alltså här begränsad till CPLD2.
-
+	Temperaturdatan avläses från temperatursensorer och skickas till temperaturmodulen denna skickar sedan datan vidare till ljudmodulen, för vidare uppläsning via ljudlagringskretsen, ISD2560P. Denna data skickas aldrig genom, men kontrolleras av, styrenheten. Den rena datavägen i systemet är alltså här begränsad till CPLD2.
+	
 	\subsection{Styrenhet}
 
-	\subsubsection{Modulbeskrivning}
-
-	Styrenheten kontrollerar och ger styrsignaler för att överse de övriga systemdelarna. Syftet är att ge en
-	lätt överblick över hela körningscykeln, där styrenheten har kontrollen över funktionerna via en rad styr-,
-	available- och acknowledgesignaler. Styrenheten får även indata från knappsats och DTMF-mottagare via moduler
-	som presenterar datan för styrenheten. Denna indata är skild från datavägen (temperaturinformation), och säger
-	till styrenheten vad den ska göra härnäst, dvs. reagera på ett korrekt sätt på användarinput.
+	Styrenheten kontrollerar och ger styrsignaler för att hantera de övriga systemdelarna. Syftet är att ge en lätt överblick över hela körcykeln, där styrenheten har kontroll över funktionerna via en rad styr-, available- och acknowledgesignaler. Styrenheten får även indata från knappsats och DTMF-mottagare via respektive modul som presenterar data för styrenheten. Denna indata är skild från datavägen (temperaturinformation), och meddelar styrenheten om näsföljande steg, dvs. reagera i enlighet med användarsignaler.
 
 	\subsubsection{Uppbyggnad}
 
-	Styrenheten är i sin tur modulärt uppbyggd, och har ett väl avgränsat interface mot varje annan delmodul, men
-	fungerar samtidigt som en samordnare mellan de olika modulerna.
-
-	\subsubsection{Tillståndsmaskin}
-
-	För en ingående grafisk beskrivning av den bakomliggande tillståndsmaskinen, se sektionen om Tillståndmaskiner.
+	Styrenheten är i sin tur modulärt uppbyggd, och har ett väl avgränsat interface mot varje annan delmodul, men fungerar samtidigt som en samordnare mellan de olika modulerna.	För en ingående grafisk beskrivning av den bakomliggande tillståndsmaskinen, se sektion~\ref{sec:Tillstandsmaskiner} ~\nameref{sec:Tillstandsmaskiner}.
 
 	\subsection{DTMF-Modul}
 		
-	\subsubsection{Modulbeskrivning}
-
-	DTMF-Modulen i CPLD1 är ansvarig för att hantera kommunikation med Telefonen och därmed med användaren.
-	När användaren trycker ner en knapp på telefonen så genereras en DTMF-signal som uppfattas och avkodas
-	av DTMF-Modulen, som sedan presenterar den mottagna indatan för Styrenheten.
+	DTMF-modulen i CPLD1 är ansvarig för att hantera kommunikation med telefonen och därmed också med användaren.
+	När användaren trycker ner en knapp på telefonen genereras en DTMF-signal som uppfattas och avkodas av DTMF-modulen vilken sedan presenterar den mottagna indatan för styrenheten.
 		
 	\subsubsection{Initiering}
 
-	DTMF-Modulen måste få en initieringspuls minst 100 ms efter spänningspåslag. Detta sker med hjälp av
+	DTMF-modulen måste få en initieringspuls minst 100 ms efter spänningspåslag. Detta sker med hjälp av
 	en extern tryckknapp, som beskrivet i användarmanualen. Under hela initieringen är Chip Select satt låg
-	och RS0 satt hög. Initieringscykeln börjar med att DTMF-Modulen läser statusregistret på MT8880-kretsen enligt ett 		i databladet givet mönster, se även Sektionen {\it Hårdvara, MT8880C} för en komplett beskrivning.
-	DTMF-Modulen är ansvarig för att ge ut rätt signalnivåer under initieringsfasen, vilket görs med hjälp av en
-	tillståndsmaskin, som finns beskriven i sektionen {\it Tillståndsmaskiner}.
+	och RS0 satt hög. Initieringscykeln börjar med att DTMF-modulen läser statusregistret och ger kommandon genom att skriva till kontrollregistret på MT8880-kretsen enligt ett i databladet givet mönster, se även sektion ~\ref{MT8880C} under~\nameref{hårdvara} för vidare beskrivning.
+	DTMF-Modulen är ansvarig för att ge ut rätt signaler under initieringsfasen, vilket görs med hjälp av en tillståndsmaskin vilken finns vidare beskriven i sektion~\ref{sec:Tillstandsmaskiner} ~\nameref{sec:Tillstandsmaskiner}.
 		
 	\subsubsection{Läsning}
 
-	Då den färdigställt initieringen går DTMF-Modulen över i ett läsläge, där den kontinuerligt lyssnar på och
-	tolkar input från MT8880C-kretsen. När valid indata detekteras läses den och läggs ut på den interna
-	DTMF-Databussen till styrenheten, varpå DTMF-Modulen signallerar "Data Valid" till Styrenheten. DTMF-Modulen
-	väntar sedan på en Acknowledgementsignal (DAck) från Styrenheten, som bekräftelse på att denna sett och läst
-	den valida datan. Läsningen sker genom att DTMF-Modulen läser Statusregistret hos MT8880C: om bit 2 är satt
-	så har en ton tagits emot, och Receive-Data-Registret läses genom att sätta RS0 låg och R/W' hög (= Read).
-	Sedan kan den mottagna datan, 4 bitar, läsas direkt från bussen.
+	Då initieringen av MT8880C är färdigställd går DTMF-Modulen över i ett läsläge, där den kontinuerligt lyssnar efter insignaler från MT8880C-kretsen. När giltig indata detekteras läses den och läggs ut på den interna DTMF-databussen till styrenheten, varpå DTMF-Modulen ger signal  ``dAv'' till styrenheten. DTMF-modulen väntar sedan på en bekräftelsesignal (dAck) från styrenheten. Läsningen sker genom att DTMF-modulen väntar på signal på avbrottsutgången (IRQ) vilket betyder att en ny DTMF-signal detekterats  och avkodats från telefonlinjen och lagts ut på databussen från MT8880C'n.
+
 
 	\subsection{Ljudmodul}
 
@@ -366,7 +320,7 @@ vilket indikerar valid data på knappsatsdatabussen, KData[3..0]. Genom att skic
 styrenheten att den sett och mottagit datan från knappsatsen.
 
 \section{Hårdvara}
-
+\label{hårdvara}
 	\subsection{ISD2560P}
 
 	\subsection{DS18S20}
@@ -390,7 +344,7 @@ styrenheten att den sett och mottagit datan från knappsatsen.
 		temperatursensorn skickas som LSB-först, och i 2-komplementsform.\\
 
 	\subsection{MT8880C}
-	
+	\label{MT8880C}
 		Avkodning av uppringandes DTMF-signaler avkodas med hjälp av MT8880C från Mittel. 
 		Telefonsignalen kopplas direkt in till DTMF-överföraren enligt specifikation för standarsuppkoppling i datablad. Endast avkodningsfunktionen på 		kretsen används. Databuss, R/W-signal, IRQ och $\Phi$2 är anslutna till kontrollenheten. 
 		CS (Chip Select) är satt konstant låg då denna krets använder bussen exklusivt. 
@@ -413,7 +367,8 @@ en initieringscykel enligt nedan:\\
 	att läsa av statusregistret, där anges om en DTMF-ton tagits emot.
 
 \section{Tillståndsmaskiner}
-		\subsection{Styrenhet}
+\label{sec:Tillstandsmaskiner}		
+\subsection{Styrenhet}
 		\subsection{Temperaturmodul}
 			Se state-machine-diagram: ~\ref{fig:TempSM} och förklaring ~\ref{fig:SMExp}\\
 			{\bf Reset:} Alla signaler och räknare återställs till sina grundvärden.\\
@@ -546,6 +501,21 @@ Jämförelserna och resultaten presenteras i en tabell nedan:
 		      \includegraphics[scale=0.48, angle=0]{UserInterface.png}
 			\label{fig:UserInterface}
 		  	\caption{Knapplayout, Knappsats resp. Telefon}
+		\end{figure}
+
+	\section{Blockschema}
+		\begin{figure}[ht!]
+		  \centering
+		      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD1.png}
+			\label{fig:BlockDiagram1}
+		  	\caption{Blockschema (CPLD1)}
+		\end{figure}
+
+		\begin{figure}[ht!]
+		  \centering
+		      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD2.png}
+			\label{fig:BlockDiagram2}
+		  	\caption{Blockschema (CPLD2)}
 		\end{figure}
 
 	\section{Komponentlista}
