@@ -8,6 +8,8 @@
 \usepackage{listings}
 \usepackage{color}
 \usepackage{appendix}
+\usepackage{caption}
+\usepackage{float}
 
 % Swedish
 \usepackage[swedish]{babel}
@@ -82,37 +84,65 @@ En tänkt tillämpning för produkten:
 \pagebreak
 
 \section{Kravspecifikation och systembeskrivning}
-	Systemet består av en styrenhet placerad på två CPLD med anslutning till telefonnätet. Sytrenheten har med hjälp av en DTMF avkodare möjlighet att tolka användarens telefonknapptryckningar på distans. Viadare kan användaren genom dessa knapptryckningar skicka signal för att hämta datavärde från någon av de två temperaturgivarna anslutna med entrådsbus, en röstenhet läser sedan upp ett förinspelat värde för respektive temperatur. Vidare kan användaren också starta eller stoppa någon av de funktionsutgångar som finns till hands, användaren får då akustisk återkoppling om aktuell status för funktionsutgången via samma ljudmodul. 
+	Systemet består av en styrenhet placerad på två CPLD med anslutning till telefonnätet. Sytrenheten har med hjälp av en DTMF avkodare möjlighet att tolka användarens telefonknapptryckningar på distans. Vidare kan användaren genom dessa knapptryckningar skicka signal för att hämta datavärde från någon av de två temperaturgivarna, anslutna anslutns med entrådsbus, en röstenhet läser sedan upp ett förinspelat meddelande för respektive temperatur. Vidare kan användaren också starta eller stoppa någon av de funktionsutgångar som finns till hands, användaren får då akustisk återkoppling om aktuell status för funktionsutgången via samma ljudmodul.
+
+Funktionsutgångarna kan också styras lokalt med med bifogade knappsatsen. Aktuell status för funktionsutgångarna visas med lysdioder. 
 
 	\subsection{Tolkning och defenition av kravspecifikation}
 
-	Inom det tilltänkta användningsområdet, ett fritidshus med POTS-linje som under större delen av året endast nyttjas tillfälligtvis, är det rimligt med en temperatur om $5-10\,^{\circ}\mathrm{C}$ då ingen vistas i huset. Vidare bör det vara önskvärt att ha möjlighet att slå till normal värme innan ett besök, kunna kontrollera att det blivit varmt samt att kontrollera att temperaturen är över $0\,^{\circ}\mathrm{C}$. Systemet kan därför tolka en temperatur om $\pm 32\,^{\circ}\mathrm{C}$ från givarna med en upplösning om $\pm 1\,^{\circ}\mathrm{C}$.
+		Inom det tilltänkta användningsområdet, ett fritidshus med POTS-linje som under större delen av året endast nyttjas tillfälligtvis, är det rimligt med en temperatur om $5-10\,^{\circ}\mathrm{C}$ då ingen vistas i huset. Vidare bör det vara önskvärt att ha möjlighet att slå till normal värme innan ett besök, kunna kontrollera att det blivit varmt samt att kontrollera att temperaturen är över $0\,^{\circ}\mathrm{C}$. Systemet kan därför tolka en temperatur om $\pm 32\,^{\circ}\mathrm{C}$ från givarna med en upplösning om $\pm 1\,^{\circ}\mathrm{C}$. Senast avläst temperatur visas också binärt på LED-displayen.
 
-Systemet matas med en spänning om $5\,V$ DC
-
-	Systemets funktion består i att användaren skall kunna ringa upp systemet och få inne- och utetemperaturen
-	uppläst. Sedan skall användaren kunna kontrollera på/av-status för ett antal olika funktioner. Temperaturen
-	läses av med hjälp av temperatursensorer och ges med en upplösning på +/- 0.5C i mätintervallet +/- 32.0C.
-	Kommandon till funktionsstyrningen ges via att användaren trycker motsvarande knapp på sin telefonknappsats.
-	Vidare finns även en fysisk, manuell knappsats på systemet för direkt styrning. Utöver att läsas upp i 
-	telefonen visas den aktuella temperaturen (binärt) på en LED-Display. Funktionsstatus samt ON/OFF för systemet
-	visas på lysdioder.
+		Systemet matas med en spänning om $5\,V$ DC, då systemet är till indikeras detta med en lysdiod.
 
 	\subsection{Uppdelning}
 
-	Systemet består av ett antal delblock (moduler), och är skrivet för att vara så modulärt som möjligt.
-	Nedan följer en sammanfattande tabell över de olika modulerna och deras funktioner. Varje modul är mer
-	utförligt beskriven i sektionen {\it Block, Funktionalitet}. För en komplett överblick, se Blockschema. \\\\
+	Systemet är uppdelat i ett antal delblock (moduler) och är konstruerat för att vara så modulärt som möjligt.
+	Nedan följer en sammanfattande tabell över hur de olika modulerna är uppdelade på de två CPLD:erna. Varje modul är mer
+	utförligt beskriven i respektive sektion under rubriken ~\ref{sec:Funktionsenheter} \nameref{sec:Funktionsenheter}. 
 
-	\begin{tabular}{l r}
-		{\bf Modul} & {\bf Funktion}\\
-	   	Styrenhet & Samordnar systemfunktioner\\
-	  	Temperaturmodul & Initierar, läser och presenterar temperatur\\
-	   	DTMF-modul & Tar emot DTMF-signaler från användaren\\
-		Ljudmodul & Spelar upp ljud lagrade på extern minneskrets\\
-		Knappsatsmodul & Hanterar knapptryckningar från användaren\\
-		Funktionsmodul & Hanterar funktionerna och deras status\\\\
+	I blockschema som återfinns i figur ~\ref{fig:blockschema1} och ~\ref{fig:blockschema2} visas respektive modul och uppdelningen på två CPLD samt dess kommunikationsvägar. \\\\
+
+	\begin{figure} [H]
+		  \centering
+		      \includegraphics[width=1\textwidth]{BlockDiagramCPLD1.png}
+			\label{fig:blockschema1}
+		  	\caption{Blockdiagram för CPLD1}
+	\end{figure}
+
+	\begin{figure}[H]
+		  \centering
+		      \includegraphics[width=1\textwidth]{BlockDiagramCPLD2.png}
+			\label{fig:blockschema2}
+		  	\caption{Blockdiagram för CPLD2}
+	\end{figure}
+
+	\begin{table} [H]
+		\label{tab:uppdelningstabell}
+		\caption{Tabell över CPLD och respektive uppgifter} 
+	\begin{tabular}{l l}
+		
+		{\bf CPLD1} \\
+		Modul	& Funktion	\\
+		\hline
+		Styrenhet	& Samordnar systemets funktion \\
+		DTMF-modul & Tar emot DTMF-signaler via POTS \\
+		Funktionsmodul	& Hanterar funktionsutgångarna \\
+		Knappmodul	& Hanterar tryckningar på knappsatsen \\
+		\\
+		{\bf CPLD2} \\
+		Modul	& Funktion	\\
+		\hline
+		Temperaturmodul	& Initierar, läser och presenterar temperatur \\
+		Ljudmodul	& Hanterar styrning av extern ljudmodul \\
+		
+		
 	\end{tabular}
+	% \end{label}
+	\end{table}
+	
+
+
+
 
 	Systemet är uppdelat enligt dataväg-styrenhet-modellen, där designprincipen går ut på att skilja styrsignaler
 	och dataflödeskontroll (Styrenheten) från själva datan som forslas genom systemet (Datavägen). Den data som
@@ -150,7 +180,7 @@ Systemet matas med en spänning om $5\,V$ DC
 	\end{figure}
 
 \section{Funktionsenheter}
-
+\label{sec:Funktionsenheter}
 	\subsection{Dataväg}
 
 	\subsubsection{Modulbeskrivning}
@@ -579,7 +609,7 @@ Jämförelserna och resultaten presenteras i en tabell nedan:
 		KBDav & Knappsats & Knappsatsmodul & Availablesignal\\
 		FuncData[3..0] & Funktionsmodul & FunktionsLEDs & Funktionsstyrning\\
 		DTMFData[3..0] & DTMF-Modul & MT8880 & Databuss till MT8880 (bidir.)\\
-		Phi2 & DTMF-Modul & MT8880 & Klocksignal till MT8880\\
+		\(\Phi\)2 & DTMF-Modul & MT8880 & Klocksignal till MT8880\\
 		R/W & DTMF-Modul & MT8880 & Read/Write till MT8880\\
 		RS0 & DTMF-Modul & MT8880 & Intieringssignal till MT8880\\
 		IRQ & MT8880 & DTMF-Modul & Interruptsignal från MT8880\\
