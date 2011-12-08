@@ -160,7 +160,15 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter vilka nedan pre
 	
 	\subsection{Styrenhet}
 
-	Styrenheten kontrollerar och ger styrsignaler för att hantera de övriga systemdelarna. Syftet är att ge en lätt överblick över hela körcykeln, där styrenheten har kontroll över funktionerna via en rad styr-, available- och acknowledgesignaler. Styrenheten får även indata från knappsats och DTMF-mottagare via respektive modul som presenterar data för styrenheten. Denna indata är skild från datavägen (temperaturinformation), och meddelar styrenheten om näsföljande steg, dvs. reagera i enlighet med användarsignaler.
+	Styrenheten kontrollerar och ger styrsignaler för att hantera de övriga systemdelarna. Syftet är att ge en lätt överblick över hela körcykeln, där styrenheten har kontroll över funktionerna via en rad styr-, available- och acknowledgesignaler. Styrenheten får även indata från knappsats och DTMF-mottagare via respektive modul som presenterar data för styrenheten. Denna indata är skild från datavägen (temperaturinformation), och meddelar styrenheten om näsföljande steg, dvs. reagera i enlighet med användarsignaler. Se figur ~\ref{fig:RCFlowChart} för flödesschema.
+
+		\begin{figure}[ht!tb]
+		  \centering
+		      \includegraphics[scale=0.5, angle=0]{ControlUnitFlowChart.png}
+		  	\caption{Högnivå-flödesdiagram för Kontrollenhet}
+			\label{fig:CUFlowChart}
+		\end{figure}
+
 
 	\subsubsection{Uppbyggnad}
 
@@ -381,7 +389,7 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 
 	\section{Användarmanual och Gränssnitt}
 	\label{sec:Manual}
-	För att använda systemet, koppla in det till en spänningskälla ($+0.5\,^{\circ}\mathrm{C}$) och till en telefonlinje.
+	För att använda systemet, koppla in det till en spänningskälla ($+5V$) och till en telefonlinje.
 	När systemet är startat ska det startas om (Röd tryckknapp) och sedan initieras (Svart tryckknapp).
 	Efter detta är systemet redo att användas, och kommandon kan ges via telefon eller manuell knappsats.
 	När som helst kan systemet startas om helt genom att igen trycka på den röda tryckknappen.
@@ -420,7 +428,7 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 	 	\end{minipage}
 	\end{table}
 
-		\begin{figure}[ht!]
+		\begin{figure}[ht!tb]
 		  \centering
 		      \includegraphics[scale=0.48, angle=0]{UserInterface.png}
 			\label{fig:UserInterface}
@@ -428,14 +436,14 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 		\end{figure}
 
 	\section{Blockschema}
-		\begin{figure}[ht!]
+		\begin{figure}[ht!tb]
 		  \centering
 		      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD1.png}
 			\label{fig:BlockDiagram1}
 		  	\caption{Blockschema (CPLD1)}
 		\end{figure}
 
-		\begin{figure}[ht!]
+		\begin{figure}[ht!tb]
 		  \centering
 		      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD2.png}
 			\label{fig:BlockDiagram2}
@@ -462,7 +470,7 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 
 	\section{Kretskortslayout}
 
-	\begin{figure}[ht!]
+	\begin{figure}[ht!tb]
 	  \centering
 	      \includegraphics[scale=0.7, angle=0]{layout.png}
 		\label{fig:layout}
