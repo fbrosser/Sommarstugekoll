@@ -88,7 +88,7 @@ En tänkt tillämpning för produkten:
 
 Funktionsutgångarna kan också styras lokalt med med bifogade knappsatsen. Aktuell status för funktionsutgångarna visas med lysdioder. 
 
-	\subsection{Tolkning och defenition av kravspecifikation}
+	\subsection{Tolkning och definition av kravspecifikation}
 
 		Inom det tilltänkta användningsområdet, ett fritidshus med POTS-linje som under större delen av året endast nyttjas tillfälligtvis, är det rimligt med en temperatur om $5-10\,^{\circ}\mathrm{C}$ då ingen vistas i huset. Vidare bör det vara önskvärt att ha möjlighet att slå till normal värme innan ett besök, kunna kontrollera att det blivit varmt samt att kontrollera att temperaturen är över $0\,^{\circ}\mathrm{C}$. Systemet kan därför tolka en temperatur om $\pm 32\,^{\circ}\mathrm{C}$ från givarna med en upplösning om $\pm 1\,^{\circ}\mathrm{C}$. Senast avläst temperatur visas också binärt på LED-displayen.
 
@@ -138,9 +138,7 @@ Funktionsutgångarna kan också styras lokalt med med bifogade knappsatsen. Aktu
 		Temperaturmodul	& Initierar, läser och presenterar temperatur \\
 		Ljudmodul	& Hanterar styrning av extern ljudmodul \\
 		
-		
 	\end{tabular}
-	% \end{label}
 	\end{table}
 	
 	Systemet är uppdelat enligt ``dataväg-styrenhet-modellen'', där designprincipen går ut på att skilja styrsignaler
@@ -152,9 +150,6 @@ Funktionsutgångarna kan också styras lokalt med med bifogade knappsatsen. Aktu
 I sitt viloläge väntar systemet på inkommande samtal. Då samtal mottages börjar systemet börjar med att läsa upp ett antal ljudklipp med aktuella temperaturer, och erbjuder sedan användaren möjligheten till att styra de externa funktionerna. Telefonen skickar ut DTMF-signaler, som läses och avkodas av DTMF-transceivern, MT8880, vilken avkodar tvåtonssignalerna för att unikt identifierna nedtryckt knapp och sänder ut denna på databussen till DTMF-modulen. 
 
 Då användaren nedtrycker en knapp sker följande. Motsvarar knapptryckningen ett funktionskommando (funktion till eller från) så sätter CPLD'n statusen för respektive funktionsutgång. \colorbox{yellow}{Lägg eventuellt in andra knapptryckningar som kan motsvara kommandon här}
-
-
-
 
 \section{Funktionsenheter}
 \label{sec:Funktionsenheter}
@@ -198,88 +193,64 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter vilka nedan pre
 
 	\subsection{Temperaturmodul}
 
-	\subsubsection{Modulbeskrivning}
-
-	Temperaturmodulen i CPLD2 är ansvarig för att hantera seriekommunikationen med 
+	Temperaturmodulen är ansvarig för att hantera seriekommunikationen med 
 	DS18S20-temperatursensorerna, via entrådsbussarna, samt att ge ut de lästa temperaturerna
-	i tecken-belopp-format till ljudmodulen, i syfte att låta den i sin tur spela upp de avlästa
-	temperaturen för systemanvändaren. För en komplett beskrivning av temperatursensorkretsen, se sektionen Hårdvara.
+	i tecken-belopp-format, där den mest signifikanta biten ger tecknet (positiv eller negativ) och efterföljande bitar temperaturdatan binärt.
+	Temperaturerna skickas via en intern databuss till ljudmodulen, i syfte att låta den i sin tur spela upp de avlästa temperaturen för användaren. 
+	För vidare beskrivning av temperatursensorkretsen, se sektion ~\ref{DS18S20} under~\nameref{hårdvara}.
 
-	\subsubsection{1-Trådsbuss}
+	\subsubsection{Entrådsbuss}
 
-	Entrådsbussarna är anslutna till matningsspänning (+5V) genom ett pull-up-motstånd på 4.7kO, och
+	Temperaturmodulen kommunicerar seriellt med temperatursensorn över en entrådsbuss.
+	Entrådsbussen är ansluten till matningsspänning (+5V) genom ett pull-up-motstånd på 4.7kOhm, och
 	ändarna av bussen är anslutna till mastern (CPLD) och sensorn (DS18S20), respektive. Då bussen
 	befinner sig i viloläge dras den hög ("svag drivning") av pull-up-motståndet. När information
 	skickas över bussen drar den kommunicerande (sändande) enheten bussen låg genom att driva den
-	med en stark logisk nolla. Se figur ~\ref{fig:TempBus}
-
-		\begin{figure}[ht!tb]
-		  \centering
-		      \includegraphics[scale=1, angle=0]{TempBus.png}
-			\label{fig:TempBus}
-		  	\caption{Uppkoppling, Entrådsbuss}
-		\end{figure}
+	med en stark logisk nolla.
 
 	\subsubsection{Läscykel}
 
-	En läscykel består av fyra steg: Initialisering, Kommandon, Läsning och Viloläge.
+	En läscykel består av fyra steg: initialisering, kommandon, läsning och viloläge.
 
-	Se även figur ~\ref{fig:RCFlowChart} för en flödesdiagram-beskrivning av en komplett läscykel.
+	(Se även figur ~\ref{fig:RCFlowChart} för en flödesdiagram-beskrivning av en hel läscykel.)
 
 	Initialiseringen består i av att mastern driver bussen låg i 512 us, sedan släpper den.
-	Temperatursensorn svarar med en närvaro-puls genom att driva bussen låg i 106 us, och därgenom bekräftar den sin 	 närvaro på bussen och sin operationella status.
+	Temperatursensorn svarar då med en närvaro-puls genom att driva bussen låg i 106 us.
 
-	Då mastern detekterat närvaropulsen börjar den överföra ett ROM-kommando (Skip ROM, 0xCC), följt av en kort 		återhämtningslucka och sedan ett Funktions-kommando (Convert Temperature, 0x44), enligt läs-/skriv-luckemetoden som 		beskrivits ovan.
+	Då mastern detekterat närvaropulsen börjar den överföra ett ROM-kommando (Skip ROM, 0xCC), följt av en kort återhämtningslucka och sedan ett Funktions-kommando (Convert Temperature, 0x44), enligt läs-/skriv-luckemetoden som beskrivits ovan.
 	Skip-ROM-kommandot används i det här systemet eftersom endast en temperatursensor används per entrådsbuss.
 	Därmed finns inget behov av att kunna addressera specifika sensorer på bussen.
-	Convert Temperature-kommandot säger till DS18S20-kretsen att börja konvertera temperaturen, och sedan spara den 
-	lästa temperaturen i sitt interna minne för att sedan läsas av mastern.
-	Under konverteringsperioden (upp till 750 ms) kan mastern polla temperatursensorns status genom att kontinuerligt
-	sända förfrågningar genom att dra bussen låg i en kort period (4 us). Temperatursensorn svarar med en nolla
-	sålänge den är upptagen med att konvertera temperatur, och sedan en etta såfort den är klar.
-	Då mastern ser att temperatursensorn är klar, initiseras temperatursensorn om och ytterligare ett ROM-Funktions- 		kommandopar överförs. Dessa är 0xCC (Skip ROM) följt av 0xBE (Read Scratchpad), respektive.
-	Idealt ska temperatursensorkretsen nu vara redo att överföra temperaturdata till mastern från sitt interna 
-	9-bytesminne.
+	Då Convert Temperature-kommandot ges gör DS18S20-kretsen en temperaturkonvertering, för att sedan spara den lästa temperaturdatan i ett internt 9-bytes minne.
+	Under konverteringsperioden (upp till 750 ms) kan mastern göra polling av temperatursensorns status. Detta innebär att mastern kontinuerligt
+	sänder förfrågningar genom att dra bussen låg i en kort period (4 us). Temperatursensorn svarar med en nolla
+	då konvertering sker, och en etta då konverteringen är klar.
+	Då mastern ser att konverteringen är klar, initialiseras temperatursensorn om och ytterligare ett ROM-Funktions-kommandopar överförs. Dessa är 0xCC (Skip ROM) följt av 0xBE (Read Scratchpad), respektive.
+	Idealt ska temperatursensorkretsen nu vara redo att överföra temperaturdata till mastern från sitt interna 9-bytesminne.
 	Då den ges Read Scratchpad-kommandot börjar DS18S20 sända över innehållet i sitt minne över bussen.
-	Mastern går då in i läsningsläget och börjar sampla datan på bussen genom att driva bussen låg, släppa den och sampla efter 4 us,
-	allt enligt den metod som beskrivs ovan. Mastern samplar de första åtta bitarna data som sänds av DS18S20, sedan en ytterligare,
-	nionde bit. Den sista biten utgör en tecken-bit, 0 för positiv temperatur och 1 för negativ. Då den nionde biten data lästs
+	Mastern går då in i läsningsläget och börjar sampla datan på bussen genom att driva bussen låg, släppa den och sampla efter 4 us.
+	Mastern samplar de första åtta bitarna data som sänds av DS18S20, sedan en ytterligare, nionde bit. 
+	Den sista biten utgör en tecken-bit för att avgöra om temperaturen är positiv eller negativ. Då den nionde biten data lästs
 	ger mastern på nytt en initieringspuls, som säger åt temperatursensorn att sluta sända data.
-	Den nyligen lästa temperaturen placeras av temperaturmodulen i CPLD'n (på CPLD2) på den interna temperaturbussen, och
-	TAv sätts till 1 för att indikera att det finns korrekt data på bussen, enligt vad som efterfrågades av styrenheten.
+	Den nyligen lästa temperaturen placeras på den interna temperaturbussen, och temperaturmodulen signallerar till styrenheten att giltig data finns på bussen.
 
 		\begin{figure}[ht!tb]
 		  \centering
 		      \includegraphics[scale=0.5, angle=0]{ReadCycleFlowChart.png}
-			\label{fig:RCFlowChart}
 		  	\caption{Högnivå-flödesdiagram för Temperaturläscykel}
+			\label{fig:RCFlowChart}
 		\end{figure}
-
-	\subsubsection{Signaler}
-
-		\begin{tabular}{l r}
-			\\{\bf In} &  \\
-			DQ0 & Kommunikationstråd till temperatursensor 0\\
-			DQ1 & Kommunikationstråd till temperatursensor 1\\
-			TRd & Styrsignal från styrenheten: Signalerar att läscykel ska inledas\\
-			TSel & Styrsignal från styrenheten som väljer temperatursensor (0/1)\\\\
-			{\bf Ut} &  \\
-			TAv & Signal till styrenheten för att signalera att valid data finns på bussen\\
-			Temp & Den interna temperaturdatabussen till ljudmodulen\\\\
-		\end{tabular}
 
 	\subsubsection{Uppbyggnad}
 
 	Temperaturmodulen är baserad runt en tillståndsmaskin, understödd av en intern Buffer/MUX-modul samt 
-	ett antal interna räknare för att generera de nödvändiga tidsfördröjningspulserna.
+	ett antal interna räknare för att generera de nödvändiga tidsfördröjningspulserna. För en grafisk beskrivning av den interna tillståndsmaskinen som används av temperaturmodulen,
+	se sektion~\ref{sec:Tillstandsmaskiner} ~\nameref{sec:Tillstandsmaskiner}.
 
 	\subsubsection{Buffer/MUX}
 
+	Buffern är en tri-state-buffer med en Enable-signal.
 	Buffer/MUX-modulen är direkt ansluten till de två DS18S20-Temperatursensorerna som använder entrådsbusskommunikationen.
-	Multiplexern (MUX) används för att välja mellan vilken av de två sensorerna (Sesnor 0 eller Sensor 1) som styrenheten
-	vill kommunicera med, och använder signalen TSel.
-	Buffern är en tri-state-buffer med en Enable-signal, E. När E är satt till 1 så kan mastern använda den av TSel valda
-	entrådsbussen som en utgång för att överföra kommandon. När E är satt till 0 kan mastern läsa data från bussen.
+	Multiplexern (MUX) används för att välja mellan vilken av de två sensorerna som styrenheten vill kommunicera med.
 
 	\subsubsection{Räknare}
 
@@ -292,27 +263,19 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter vilka nedan pre
 			bitCnt & 8 & Anger aktuell bit för överföring/läsning\\\\
 		\end{tabular}
 
-	\subsubsection{Tillståndsmaskin}
-
-	För en uttömmande grafisk beskrivning av den interna tillståndsmaskinen som används av temperaturmodulen,
-	se sektionen om tillståndsmaskiner.
+	Se sektion~\ref{sec:programlistningar} ~\nameref{sec:Programlistningar}.
 
 	\subsection{Extern funktionsstyrning}
-
-\subsubsection{Modulbeskrivning}
 
 Funktionsmodulen är mycket enkelt uppbyggd, den tar emot data från Styrenheten och skickar vidare 
 uppdateringarna ut på de I/O-pinnar som används för funktionerna. Sammanfattat fungerar den som ett
 mellansteg för att underlätta för styrenhetens funktionsstyrning, och kan vid behov byggas ut ytterligare
 för att implementera andra funktioner i systemet.
 
-	\subsection{Fysiskt användargränssnitt och Knappsats}
+	\subsection{Användargränssnittshantering}
 
-\subsubsection{Modulbeskrivning}
-
-Se även grafisk beskrivning av användargränssnittet ~\ref{fig:UserInterface}
-Systemet har, förutom DTMF-kontroll, även ett fysiskt gränssnitt med en knappsats samt en På/Av-Brytare för temperaturläsning.
-Dessa rådata måste formateras, avkodas och presenteras för styrenheten. Detta är Knappsatsmodulens uppgift.
+Systemet har, förutom DTMF-kontroll, även ett fysiskt gränssnitt med en knappsats samt en till/från-brytare för temperaturläsning.
+Dessa rådata måste formateras, avkodas och presenteras för styrenheten. Detta är knappsatsmodulens uppgift.
 
 Om en knapp på knappsatsen trycks ned, skickas en availablesignal (DAv) från knappsatsen till knappsatsmodulen, som sedan
 avkodar vilken knapp som tryckts ned, och presenterar detta för styrenheten genom att höja en KAv (Keyboard Available)-signal,
@@ -324,7 +287,7 @@ styrenheten att den sett och mottagit datan från knappsatsen.
 	\subsection{ISD2560P}
 
 	\subsection{DS18S20}
-	
+	\label{DS18S20}
 		Den temperatursensor som används är Maxim DS18S20, som ger temperaturmodulen möjlighet att läsa av temperaturen
 		med nio (9) bitars upplösning. Sensorerna som användas i detta system drivs av en extern spänningskälla på +5V,
 		och kommunicerar seriellt över en entrådsbuss. Seriekommunikationen baserar på att bus-mastern initierar skriv-
@@ -348,23 +311,8 @@ styrenheten att den sett och mottagit datan från knappsatsen.
 		Avkodning av uppringandes DTMF-signaler avkodas med hjälp av MT8880C från Mittel. 
 		Telefonsignalen kopplas direkt in till DTMF-överföraren enligt specifikation för standarsuppkoppling i datablad. Endast avkodningsfunktionen på 		kretsen används. Databuss, R/W-signal, IRQ och $\Phi$2 är anslutna till kontrollenheten. 
 		CS (Chip Select) är satt konstant låg då denna krets använder bussen exklusivt. 
-Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms efter spänningspåslag. Sedan följer
-en initieringscykel enligt nedan:\\
-
-	{\bf Initiering}
-
-	\begin{tabular}{l c c c r}
-		\\{\bf Beskrivning} & {\bf CS'} & {\bf RS0} & {\bf R/W'} & {\bf Data[3..0]}\\
-		Läs Statusregister 	& 0 & 1 & 1 & 0000\\
-		Skriv till Kontrollreg. & 0 & 1 & 0 & 0000\\
-		Skriv till Kontrollreg. & 0 & 1 & 0 & 0000\\
-		Skriv till Kontrollreg. & 0 & 1 & 0 & 1000\\
-		Skriv till Kontrollreg. & 0 & 1 & 0 & 0000\\
-		Läs Statusregister 	& 0 & 1 & 1 & 0000\\\\
-	\end{tabular}
-	
-	Efter initiering är kretsen klar att avkoda och ge ut DTMF-signaler. Polling av DTMF-data sker genom
-	att läsa av statusregistret, där anges om en DTMF-ton tagits emot.
+Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms efter spänningspåslag. Detaljer om initieringscykeln finns i databladet för MT8880C.
+\colorbox{yellow}{Referens till Datablad?} \\
 
 \section{Tillståndsmaskiner}
 \label{sec:Tillstandsmaskiner}		
@@ -415,41 +363,17 @@ en initieringscykel enligt nedan:\\
 
 \section{Felanalys}
 
-\subsection{Temperaturmätfel}
-
 Då systemet hanterar avläsning av temperaturer och endast klarar ett begränsat temperaturintevall
-görs här en felanalys (mätfel). För de tillämpningsområden systemet är konstruerat för (Hemanvändare) 
+görs här en felanalys. För de tillämpningsområden systemet är konstruerat för (hemanvändare) 
 är mätfelen dock för små för att ha betydelse.
 
-Temperatursensorerna arbetar med en temperaturupplösning på 0.5C, och här fås alltså därför en oexakthet.
-Enligt temperatursensorns datablad gäller exaktheten på +/- 0.5C i intervallet -10C till +85C.
-Systemet arbetar med ett temperaturspann på +/- 32C, allt utanför intervallet representeras som maxtemperaturen.
-
-Testning av temperaturavläsningen har gjorts under utvecklingsperioden genom att värma och kyla temperatursensorerna,
-och sensorerna visade de väntade resultaten, då jämförelser gjordes för inom- och utomhustemperatur kontrollerat med
-en vanlig, kommersiell fönstertermometer med samma upplösning. Slutsatsen från jämförelserna blir att de två 
-termometrarna följer varandra bra, och det går inte att avgöra vilken som är mer exakt. För vanlig hemanvändning
-är båda fullt tillräckliga.
-
-Jämförelserna och resultaten presenteras i en tabell nedan: 
-
-	\begin{tabular}{l c r}
-		\\{\bf DS18S20} & {\bf Fönstertermometer} & {\bf Differens [C]}\\
-		4.5 & 5 & -0.5\\		
-		11 & 9 & 2\\		
-		18 & 18 & 0\\
-		20 & 20 & 0\\	
-		22 & 22 & 0\\
-		25 & 26 & 0\\		
-		36.5 & 37 & -0.5\\
-		70.5 & 73 & -2.5 \\\\
-	\end{tabular}
+Temperatursensorerna arbetar med en temperaturupplösning på $0.5\,^{\circ}\mathrm{C}$, exaktheten på $\pm 0.5\,^{\circ}\mathrm{C}$ gäller i intervallet $-10\,^{\circ}\mathrm{C}$ till $+85\,^{\circ}\mathrm{C}$.
+Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt utanför intervallet representeras som maxtemperaturen.
 
 \pagebreak
-% {\bf \huge Appendix}
 
 	\appendix
-	\renewcommand{\appendixpagename}{Appendix}
+	\renewcommand{\appendixpagename}{Appendix}t
 	\appendixpage
 	\renewcommand{\appendixtocname}{Appendix}
 
@@ -457,7 +381,7 @@ Jämförelserna och resultaten presenteras i en tabell nedan:
 
 	\section{Användarmanual och Gränssnitt}
 	\label{sec:Manual}
-	För att använda systemet, koppla in det till en spänningskälla (+5V) och till en telefonlinje (RJ11).
+	För att använda systemet, koppla in det till en spänningskälla ($+0.5\,^{\circ}\mathrm{C}$) och till en telefonlinje.
 	När systemet är startat ska det startas om (Röd tryckknapp) och sedan initieras (Svart tryckknapp).
 	Efter detta är systemet redo att användas, och kommandon kan ges via telefon eller manuell knappsats.
 	När som helst kan systemet startas om helt genom att igen trycka på den röda tryckknappen.
@@ -536,22 +460,6 @@ Jämförelserna och resultaten presenteras i en tabell nedan:
 		  	\caption{Kretsschema}
 		\end{figure}
 
-	\section{Pin-Layout}
-
-		\begin{figure}[ht!]
-		  \centering
-		      \includegraphics[scale=0.48, angle=0]{PinDiagram.png}
-			\label{fig:Pin1}
-		  	\caption{Pin-Konfiguration (CPLD1)}
-		\end{figure}
-
-		\begin{figure}[ht!]
-		  \centering
-		      \includegraphics[scale=0.48, angle=0]{PinDiagram.png}
-			\label{fig:Pin1}
-		  	\caption{Pin-Konfiguration (CPLD2)}
-		\end{figure}
-
 	\section{Kretskortslayout}
 
 	\begin{figure}[ht!]
@@ -627,5 +535,6 @@ Jämförelserna och resultaten presenteras i en tabell nedan:
 	\end{tabular}
 
 	\section{Programlistningar}
-	
+	\label{sec:programlistningar}	
+
 \end{document}
