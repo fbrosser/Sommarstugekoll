@@ -192,12 +192,13 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter vilka nedan pre
 
 
 	\subsection{Ljudmodul}
-
-		\subsubsection{Modulbeskrivning}
-
-		\subsubsection{Initiering}
+	\colorbox{yellow}{Inlagt 2011-12-09}
+		Ljudmodulen styr den externa ljudlagringskretsen och signalerar till styrenheten när en uppspelning är färdig. Genom att ställa om värdet av C/T signalen så kan styrenheten begära en vanlig ljuduppspelning eller en temperaturuppspelning.
 
 		\subsubsection{Addressering och Uppspelning}
+När styrenheten begär en temperaturuppspelning så börjar ljudmodulen att läsa av temperaturmodulens databuss. Om temperaturen är giltig (dvs. innanför det giltiga mätspannet) så skickar ljudmodulen ut de 6 minst signifikanta bitarna av temperaturen direkt till ljudkretsen och triggar en uppspelning. Ljudkretsen är programmerad på sådant vis att temperaturbussens värde är mappat 1:1 till det korrekta ljudklippet.  Om en overflow har skett så ställs temperaturen helt enkelt till det högsta giltiga värdet och uppspelningen fortsätter. Efter att själva temperaturen är färdiguppspelad så granskar ljudmodulen åter igen temperaturbussen och spelar upp "minusgrader" eller "plusgrader" beroende på vilken sida nollstrecket man befinner sig på. Därefter signaleras styrenheten att uppspelningen är färdig.
+
+Vid en vanlig uppspelning använder sig ljudmodulen av en 4-bitars adress kommande från styrenheten. Innan uppspelning förlängs denna till 6 bitar genom att lägga till en ny statisk MSB och en ny statisk LSB. Adressen "kläms" på så sätt in mellan två nya bitar. Anledningen för den udda förlängningen beror på att ljudklippen som styrenheten begär kräver mer lagringsutrymme på ljudkretsen än vad temperaturerna gör. Hårdvarubeskrivningen förklarar detta i mer detalj.
 
 	\subsection{Temperaturmodul}
 
@@ -291,6 +292,11 @@ styrenheten att den sett och mottagit datan från knappsatsen.
 \section{Hårdvara}
 \label{hårdvara}
 	\subsection{ISD2560P}
+	\colorbox{yellow}{Inlagt 2011-12-09}
+ISD2560P är en integrerad inspelning och uppspelningskrets med plats för 60 sekunder ljud. Kretsen är inkopplad enligt ett modifierat förslagsschema i databladet och brukas i sk. Direct Addressing Mode. Kretsen har 10 adresspinnar med 600 giltiga adresser. Var adress förflyttar uppspelningspekaren med 0.1 sekunder (0.1 sekunder * 600 adresser = 60 sekunder). CE pinnen, EoM pinnen och 6 adresspinnar är anslutna till CPLDn. Uppspelningen styrs av den flanktriggade Chip Enable pinnen som är aktiv låg. När denna får en puls så latchas adressvärdena och en uppspelning påbörjas. Uppspelning avslutas med en annan (aktiv låg) puls på End Of Message pinnen.
+
+De 3 minst signifikanta adressbitarna och den mest signifikanta adressbiten är knutna till jord. Resterande 6 bitar styrs av CPLDn. Inkoppling på detta vis innebär ljudklippslängder i multiplar av 0.8 sekunder. Alla siffror som läses upp ryms i enskilda 0.8 sekundersblock och kan således adresseras utan vidare. Längre ljudklipp kräver aldrig mer än 1.6 sekunder och kan tilldelas block av dubbel längd genom att använda 5-bitarsadressering med en statisk LSB.
+	\colorbox{yellow}{Referens till datablad?}
 
 	\subsection{DS18S20}
 	\label{DS18S20}
