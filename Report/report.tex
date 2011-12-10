@@ -45,7 +45,7 @@
 	{\noindent \bf Sammanfattning}
 \end{center}
 
-	Ett system för temperaturavläsning och relästyrning beskrivs genom denna rapport. Systemet är åtkomligt och styrbart via telefon genom DTMF (Dual Tone Multiple Frequency). Systemets funktion består i att informera användaren om aktuella temperaturer från två temperatursensorer samt ge användaren möjlighet att via telefon styra utgångarna (till/från) för exempelvis värmeelement eller belysning. Styrning och återkoppling utbytes genom en telefonlinje, POTS (Plain Old Telephone Service) med hjälp av DTMF.
+	Ett system för temperaturavläsning och relästyrning beskrivs genom denna rapport. Systemet är åtkomligt och styrbart via telefon genom DTMF (Dual Tone Multiple Frequency). Systemets funktion består i att informera användaren om aktuella temperaturer från två temperatursensorer samt ge användaren möjlighet att via telefon styra utgångarna (till/från) för exempelvis värmeelement eller belysning. Styrning och återkoppling utbytes genom en telefonlinje, POTS (Plain Old Telephone Service) med hjälp av DTMF. \colorbox{yellow}{Sista meningen här är lite konstig. Förslag på omformulering?}
 
 En tänkt tillämpning för produkten:
 \begin{list}{*}{}
@@ -59,17 +59,18 @@ En tänkt tillämpning för produkten:
 \end{center}
 
 	The system described in this report is an automated domestic temperature control system, accessible and controllable via
-	a standard telephone connection (DTMF). The main functionality of the system is informing the user of the current temperatures
-	at the points of measurement, and also to give the user the ability to remotely control (simple on/off) a number of external
-	functions. These functions could be, for example, heating systems, radiators or air conditioning. Information- and control data
-	is exchanged via a standard, analog telephone connection, using DTMF: Dual Tone, Multiple Frequency.
+	telephone. The main function of the system is to inform the user of the current temperatures
+	at the points of measurement, and also to give the user remote binary control (on/off) of a number of external
+	functions. These functions could for example be heating systems, radiators, or air conditioning. Information- and control data
+	is exchanged via a standard analog telephone connection using DTMF (Dual Tone, Multiple Frequency).
 
-	A specific, practical usage example is the concerned holiday home owner wanting to keep control of the heating in his summer house.
-	Using Sommarstugekoll, one can keep the temperature at a reasonable level, avoiding for example pipes freezing, but at the same time
-	keeping the total heating costs to a minimum. Sommarstugekoll solves this by offering users a neat and simple way to keep track
-	of in- and outdoor temperatures - when the previously mentioned summer house owner wishes to make a visit, he simply dials the
-	summer house telephone number giving it instructions to bring the temperature up to a comfortable level, all while he makes
-	the drive up. Simple - smart - elegant - Sommarstugekoll is the domestic temperature automation assistant of the future!
+	A specific, practical application is of the concerned holiday home owner wanting to monitor and control the temperature 
+	in his or her vacation property. Using Sommarstugekoll it is possible to keep heating expenditures to a minimum while at 
+	the same time reducing the risk of temperature related property damage such as burst water pipes.
+
+	Should the owner wish to visit the property, he or she needs only to dial the house telephone prior to arrival and instruct the system to raise
+	the interior temperature to a comfortable level. 
+
  \thispagestyle{empty}
 \pagebreak
 
@@ -77,16 +78,16 @@ En tänkt tillämpning för produkten:
 \section{Introduktion}
 
 	Konstruktionsprojektet utförs inom kursen ``Digital Konstruktion, EDA234'' vid Chalmers Tekniska Högskola. Uppgiften består att inom gruppen om 4 personer konstruera och dokumentera
-	ett digitalsystem utifrån en specifikation, med fokus låg på huvudfunktionalitet i det digitala området. Utvecklingen sker på ett färdigt utvecklingskort vilket sedan kompletteras med externa kretsar och programmeras för att nå kravspecefikationen. Logikkretsen som används är en Xilinx XC9572XL CPLD, och utveckligen sker i huvudsak med VHDL i Xilinx ISE-miljön samt i ModelSim för simuleringar. Rapporten är uppdelad i abstraktionslager med fördjupningar i de senare avsnitten. 
+	ett digitalsystem utifrån en specifikation, med fokus på huvudfunktionalitet i det digitala området. Utvecklingen sker på ett färdigt utvecklingskort vilket sedan kompletteras med externa kretsar och programmeras för att nå kravspecefikationen. Logikkretsen som används är en Xilinx XC9572XL CPLD, och utveckligen sker i huvudsak med VHDL i Xilinx ISE-miljön samt i ModelSim för simuleringar. Rapporten är uppdelad i abstraktionslager med fördjupningar i de senare avsnitten. 
 
 	En handhavandeinstruktion återfinns bifogad i Appendix~\ref{sec:Manual}.
 
 \pagebreak
 
 \section{Kravspecifikation och systembeskrivning}
-	Systemet består av en styrenhet placerad på två CPLD med anslutning till telefonnätet. Sytrenheten har med hjälp av en DTMF avkodare möjlighet att tolka användarens telefonknapptryckningar på distans. Vidare kan användaren genom dessa knapptryckningar skicka signal för att hämta datavärde från någon av de två temperaturgivarna, anslutna anslutns med entrådsbus, en röstenhet läser sedan upp ett förinspelat meddelande för respektive temperatur. Vidare kan användaren också starta eller stoppa någon av de funktionsutgångar som finns till hands, användaren får då akustisk återkoppling om aktuell status för funktionsutgången via samma ljudmodul.
+	Systemet består av en styrenhet placerad på två CPLD med anslutning till telefonnätet. Styrenheten har med hjälp av en DTMF avkodare möjlighet att tolka användarens telefonknapptryckningar på distans. Vidare kan användaren genom dessa knapptryckningar skicka signal för att hämta datavärde från någon av de två temperaturgivarna anslutna med entrådsbus. En röstenhet läser sedan upp ett förinspelat meddelande för respektive temperatur. Vidare kan användaren också starta eller stoppa någon av de funktionsutgångar som finns till hands, användaren får då akustisk återkoppling om aktuell status för funktionsutgången via samma ljudmodul.
 
-Funktionsutgångarna kan också styras lokalt med med bifogade knappsatsen. Aktuell status för funktionsutgångarna visas med lysdioder. 
+Funktionsutgångarna kan också styras lokalt med bifogade knappsatsen. Aktuell status för funktionsutgångarna visas med lysdioder. 
 
 	\subsection{Tolkning och definition av kravspecifikation}
 
@@ -136,7 +137,7 @@ Funktionsutgångarna kan också styras lokalt med med bifogade knappsatsen. Aktu
 		Modul	& Funktion	\\
 		\hline
 		Temperaturmodul	& Initierar, läser och presenterar temperatur \\
-		Ljudmodul	& Hanterar styrning av extern ljudmodul \\
+		Ljudmodul	& Hanterar styrning av extern ljudkrets \\
 		
 	\end{tabular}
 	\end{table}
@@ -147,7 +148,7 @@ Funktionsutgångarna kan också styras lokalt med med bifogade knappsatsen. Aktu
 
 	\subsection{Arbetsflöde}
 
-I sitt viloläge väntar systemet på inkommande samtal. Då samtal mottages börjar systemet börjar med att läsa upp ett antal ljudklipp med aktuella temperaturer, och erbjuder sedan användaren möjligheten till att styra de externa funktionerna. Telefonen skickar ut DTMF-signaler, som läses och avkodas av DTMF-transceivern, MT8880, vilken avkodar tvåtonssignalerna för att unikt identifierna nedtryckt knapp och sänder ut denna på databussen till DTMF-modulen. 
+I sitt viloläge väntar systemet på inkommande samtal. Då samtal mottages börjar systemet med att läsa upp ett antal ljudklipp med aktuella temperaturer, och erbjuder sedan användaren möjligheten till att styra de externa funktionerna. Telefonen skickar ut DTMF-signaler, som läses och avkodas av DTMF-transceivern, MT8880, vilken avkodar tvåtonssignalerna för att unikt identifierna nedtryckt knapp och sänder ut denna på databussen till DTMF-modulen. 
 
 Då användaren nedtrycker en knapp sker följande. Motsvarar knapptryckningen ett funktionskommando (funktion till eller från) så sätter CPLD'n statusen för respektive funktionsutgång. \colorbox{yellow}{Lägg eventuellt in andra knapptryckningar som kan motsvara kommandon här}
 
@@ -156,11 +157,11 @@ Då användaren nedtrycker en knapp sker följande. Motsvarar knapptryckningen e
 Systemet är som tidigare nämnt uppdelat i sex funktionsenheter vilka nedan presenteras närmare.
 
 	\subsection{Dataväg}
-	Temperaturdatan avläses från temperatursensorer och skickas till temperaturmodulen denna skickar sedan datan vidare till ljudmodulen, för vidare uppläsning via ljudlagringskretsen, ISD2560P. Denna data skickas aldrig genom, men kontrolleras av, styrenheten. Den rena datavägen i systemet är alltså här begränsad till CPLD2.
+	Temperaturdatan avläses från temperatursensorer och skickas till temperaturmodulen. Denna skickar sedan datan till ljudmodulen, för vidare uppläsning via ljudlagringskretsen, ISD2560P. Denna data skickas aldrig genom, men kontrolleras av, styrenheten. Den rena datavägen i systemet är alltså här begränsad till CPLD2.
 	
 	\subsection{Styrenhet}
 
-	Styrenheten kontrollerar och ger styrsignaler för att hantera de övriga systemdelarna. Syftet är att ge en lätt överblick över hela körcykeln, där styrenheten har kontroll över funktionerna via en rad styr-, available- och acknowledgesignaler. Styrenheten får även indata från knappsats och DTMF-mottagare via respektive modul som presenterar data för styrenheten. Denna indata är skild från datavägen (temperaturinformation), och meddelar styrenheten om näsföljande steg, dvs. reagera i enlighet med användarsignaler. Se figur ~\ref{fig:RCFlowChart} för flödesschema.
+	Styrenheten kontrollerar och ger styrsignaler för att hantera de övriga systemdelarna. Syftet är att ge en lätt överblick över hela körcykeln, där styrenheten har kontroll över funktionerna via en rad styr-, available- och acknowledgesignaler. Styrenheten får även indata från knappsats och DTMF-mottagare via respektive modul som presenterar data för styrenheten. Denna indata är skild från datavägen (temperaturinformation), och meddelar styrenheten om nästföljande steg, dvs. reagera i enlighet med användarsignaler. Se figur ~\ref{fig:RCFlowChart} för flödesschema.
 
 		\begin{figure}[ht!tb]
 		  \centering
@@ -183,8 +184,8 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter vilka nedan pre
 
 	DTMF-modulen måste få en initieringspuls minst 100 ms efter spänningspåslag. Detta sker med hjälp av
 	en extern tryckknapp, som beskrivet i användarmanualen. Under hela initieringen är Chip Select satt låg
-	och RS0 satt hög. Initieringscykeln börjar med att DTMF-modulen läser statusregistret och ger kommandon genom att skriva till kontrollregistret på MT8880-kretsen enligt ett i databladet givet mönster, se även sektion ~\ref{MT8880C} under~\nameref{hårdvara} för vidare beskrivning.
-	DTMF-Modulen är ansvarig för att ge ut rätt signaler under initieringsfasen, vilket görs med hjälp av en tillståndsmaskin vilken finns vidare beskriven i sektion~\ref{sec:Tillstandsmaskiner} ~\nameref{sec:Tillstandsmaskiner}.
+	och RS0 satt hög. Initieringscykeln börjar med att DTMF-modulen läser statusregistret och ger kommandon genom att skriva till kontrollregistret på MT8880-kretsen enligt ett i databladet givet mönster. Se även sektion ~\ref{MT8880C} under~\nameref{hårdvara} för vidare beskrivning.
+	DTMF-Modulen är ansvarig för att ge ut rätt signaler under initieringsfasen, vilket görs med hjälp av en tillståndsmaskin. Denna finns beskriven i sektion~\ref{sec:Tillstandsmaskiner} ~\nameref{sec:Tillstandsmaskiner}.
 		
 	\subsubsection{Läsning}
 
@@ -193,7 +194,7 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter vilka nedan pre
 
 	\subsection{Ljudmodul}
 	\colorbox{yellow}{Inlagt 2011-12-09}
-		Ljudmodulen styr den externa ljudlagringskretsen och signalerar till styrenheten när en uppspelning är färdig. Genom att ställa om värdet av C/T signalen så kan styrenheten begära en vanlig ljuduppspelning eller en temperaturuppspelning.
+		Ljudmodulen styr den externa ljudlagringskretsen och signalerar till styrenheten när en uppspelning är färdig. Genom att ställa om värdet av C/T signalen kan styrenheten begära en vanlig ljuduppspelning eller en temperaturuppspelning.
 
 		\subsubsection{Addressering och Uppspelning}
 När styrenheten begär en temperaturuppspelning så börjar ljudmodulen att läsa av temperaturmodulens databuss. Om temperaturen är giltig (dvs. innanför det giltiga mätspannet) så skickar ljudmodulen ut de 6 minst signifikanta bitarna av temperaturen direkt till ljudkretsen och triggar en uppspelning. Ljudkretsen är programmerad på sådant vis att temperaturbussens värde är mappat 1:1 till det korrekta ljudklippet.  Om en overflow har skett så ställs temperaturen helt enkelt till det högsta giltiga värdet och uppspelningen fortsätter. Efter att själva temperaturen är färdiguppspelad så granskar ljudmodulen åter igen temperaturbussen och spelar upp "minusgrader" eller "plusgrader" beroende på vilken sida nollstrecket man befinner sig på. Därefter signaleras styrenheten att uppspelningen är färdig.
@@ -222,7 +223,7 @@ Vid en vanlig uppspelning använder sig ljudmodulen av en 4-bitars adress komman
 
 	(Se även figur ~\ref{fig:RCFlowChart} för en flödesdiagram-beskrivning av en hel läscykel.)
 
-	Initialiseringen består i av att mastern driver bussen låg i 512 us, sedan släpper den.
+	Initialiseringen består i av att mastern driver bussen låg i 512 us och sedan släpper den.
 	Temperatursensorn svarar då med en närvaro-puls genom att driva bussen låg i 106 us.
 
 	Då mastern detekterat närvaropulsen börjar den överföra ett ROM-kommando (Skip ROM, 0xCC), följt av en kort återhämtningslucka och sedan ett Funktions-kommando (Convert Temperature, 0x44).
@@ -233,9 +234,9 @@ Vid en vanlig uppspelning använder sig ljudmodulen av en 4-bitars adress komman
 	då konvertering sker, och en etta då konverteringen är klar.
 	Då mastern ser att konverteringen är klar, initialiseras temperatursensorn om och ytterligare ett ROM-Funktions-kommandopar överförs. Dessa är 0xCC (Skip ROM) följt av 0xBE (Read Scratchpad), respektive.
 	Idealt ska temperatursensorkretsen nu vara redo att överföra temperaturdata till mastern från sitt interna 9-bytesminne.
-	Då den ges Read Scratchpad-kommandot börjar DS18S20 sända över innehållet i sitt minne över bussen.
+	Då den ger Read Scratchpad-kommandot börjar DS18S20 sända innehållet i sitt minne över bussen.
 	Mastern går då in i läsningsläget och börjar sampla datan på bussen genom att driva bussen låg, släppa den och sampla efter 4 us.
-	Mastern samplar de första åtta bitarna data som sänds av DS18S20, sedan en ytterligare, nionde bit. 
+	Mastern samplar de första åtta bitarna som sänds av DS18S20, sedan en ytterligare, nionde bit. 
 	Den sista biten utgör en tecken-bit för att avgöra om temperaturen är positiv eller negativ. Då den nionde biten data lästs
 	ger mastern på nytt en initieringspuls för att avbryta läsningen.
 	Den nyligen lästa temperaturen placeras på den interna temperaturbussen, och temperaturmodulen signalerar till styrenheten att giltig data finns på bussen.
@@ -274,7 +275,7 @@ Vid en vanlig uppspelning använder sig ljudmodulen av en 4-bitars adress komman
 
 	\subsection{Extern funktionsstyrning}
 
-Funktionsmodulen är mycket enkelt uppbyggd, den tar emot data från Styrenheten och skickar vidare 
+Funktionsmodulen är mycket enkelt uppbyggd. Den tar emot data från Styrenheten och skickar vidare 
 uppdateringarna ut på de I/O-pinnar som används för funktionerna. Sammanfattat fungerar den som ett
 mellansteg för att underlätta för styrenhetens funktionsstyrning, och kan vid behov byggas ut ytterligare
 för att implementera andra funktioner i systemet.
@@ -286,7 +287,7 @@ Dessa rådata måste formateras, avkodas och presenteras för styrenheten. Detta
 
 Om en knapp på knappsatsen trycks ned, skickas en availablesignal (DAv) från knappsatsen till knappsatsmodulen, som sedan
 avkodar vilken knapp som tryckts ned, och presenterar detta för styrenheten genom att höja en KAv (Keyboard Available)-signal,
-vilket indikerar valid data på knappsatsdatabussen, KData[3..0]. Genom att skicka en Acknowledgement-signal, KAck, bekräftar 
+vilket indikerar giltig data på knappsatsdatabussen, KData[3..0]. Genom att skicka en Acknowledgement-signal, KAck, bekräftar 
 styrenheten att den sett och mottagit datan från knappsatsen.
 
 \section{Hårdvara}
