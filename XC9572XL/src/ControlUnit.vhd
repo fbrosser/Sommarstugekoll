@@ -5,7 +5,7 @@
 --
 -- FILE
 -- ControlUnit.vhd
--- Last Updated: 2011-11-27
+-- Last Updated: 2011-12-10
 --
 -- VERSION
 -- Hardware ("production") v1.0
@@ -56,6 +56,9 @@ Entity ControlUnit is
 				dAv			: in		std_logic;
 				-- Acknowledgement signal to DTMF module
 				dAck			: out		std_logic;
+
+				-- Call In Progress-signal
+				cIP			: in		std_logic;
 				
 				-- KEYBOARD MODULE
 				-- Data input from keyboard
@@ -76,6 +79,8 @@ Entity ControlUnit is
 				sSel			: out		std_logic;
 				-- Address bus to Sound Module
 				sAddr			: out		std_logic_vector(3 downto 0)
+
+
 	);
 end ControlUnit;
 
@@ -223,26 +228,6 @@ Architecture Behavioral of ControlUnit is
 		begin
 			-- Defaults
 			nextState <= state;
---
---			case state is
---				when 0 =>
---					SAddr <= "1000";
---					SSel <= '1';
---					nextFuncStatus(2) <= '1';
---					if(Trig = '1') then
---						nextState <= state + 1;
---						SPlay <= '1';
---					end if;
---				when 1 =>
---					if(SDone = '1') then
---						nextFuncStatus(0) <= '1';
---						nextState <= state + 1;
---					end if;
---				when 2 =>
---					nextState <= 0;
---				when others =>
---					nextState <= 0;
---			end case; 
 	
 			case state is
 				when 0 =>
@@ -267,45 +252,171 @@ Architecture Behavioral of ControlUnit is
 --			case state is
 --				when 0 =>
 --					-- Wait for call in progress
---					nextState <= state + 1;
---					TRd <= '1';
---					nextTSelStatus <= '0';
---					SData <= "0000";
---					SPlay <= '1';
---					SSel <= '1';
+--					if(cIP) then
+--						nextState <= state + 1;
+--						tRd <= '1';
+--						nextTSelStatus <= '0';
+--						sData <= "0000";
+--						sPlay <= '1';
+--						sSel <= '1';
+--					end if;
 --				when 1 =>
 --					-- Play sound ("temperaturen inne ar")
---					if(SDone = '1' and TAv = '1') then
---						SSel <= '0';
---						SPlay <= '1';
+--					if(sDone = '1' and tAv = '1') then
+--						sSel <= '0';
+--						tRd <= '0';
+--						sPlay <= '1';
 --						nextState <= state + 1;
 --					end if;
 --				when 2 =>
 --					-- Play indoor temperature
---					if(SDone = '1') then
---						SSel <= '1';
---						TRd <= '1';
+--					if(sDone = '1') then
+--						sSel <= '1';
+--						tRd <= '1';
 --						nextTSelStatus <= '1';
---						SData <= "0001";
+--						sData <= "0001";
 --						nextState <= state + 1;
 --					end if;
 --				when 3 =>
 --					-- Play sound ("temperaturen ute ar")
---					if(SDone = '1' and TAv = '1') then
---						SSel <= '0';
---						SPlay <= '1';
+--					if(sDone = '1' and tAv = '1') then
+--						sSel <= '0';
+						tRd <= '0';
+--						sPlay <= '1';
 --						nextState <= state + 1;
 --					end if;
 --				when 4 =>
---					if(SDone = '1') then 
---						SSel <= '1';
---						SData <= "0100";
+--					-- Play outdoor temperature
+--					if(sDone = '1') then 
+--						sSel <= '1';
+--						sData <= "0100";
+--						sPlay <= '1';
+--						nextState <= state + 1;
+--					end if;
+--				when 5 =>
+--					-- Play sound ("Funktionsstyrning")
+--					if(sDone = '1') then
 --						nextState <= state + 1;
 --					end if;
 --				when 6 =>
+--					-- Wait for input
+--					if(cIP = '0') then
+--						-- Call over, go back to idle state
+--						nextState <= 0;
+--					elsif(dAv = '1') then
+--						dAck <= '1';
+--						sSel <= '1';
+--						-- Respond to input
+--						case dData is
+--							when "0001" =>	-- 1
+--								en <= '1';
+--								nextFuncStatus(0) <= '1';
+--								sData <= "0101"; -- F1
+--								sPlay <= '1';
+--								nextState <= 7;
+--							when "0010" =>	-- 2
+--								en <= '1';
+--								nextFuncStatus(1) <= '1';
+--								sData <= "0110"; -- F2
+--								sPlay <= '1';
+--								nextState <= 8;
+--							when "0011" =>	-- 3
+--								en <= '1';
+--								nextFuncStatus(2) <= '1';
+--								sData <= "0111"; -- F3
+--								sPlay <= '1';
+--								nextState <= 9;
+--							when "0100" =>	-- 4
+--								en <= '1';
+--								nextFuncStatus(0) <= '0';
+--								sData <= "0101"; -- F1
+--								sPlay <= '1';
+--								nextState <= 7;
+--							when "0101" =>	-- 5
+--								en <= '1';
+--								nextFuncStatus(1) <= '0';
+--								sData <= "0110"; -- F2
+--								sPlay <= '1';
+--								nextState <= 8;
+--							when "0110" =>	-- 6
+--								en <= '1';
+--								nextFuncStatus(2) <= '0';
+--								sData <= "0111"; -- F3
+--								sPlay <= '1';
+--								nextState <= 9;
+--							when "0111" =>	-- 7
+--								en <= '1';
+--								nextFuncStatus(3) <= '1';
+--								sData <= "1000"; -- F4
+--								sPlay <= '1';
+--								nextState <= 10;
+--							when "1000" => -- 8
+--								en <= '1';
+--								nextFuncStatus(3) <= '0';
+--								sData <= "1000"; -- F4
+--								sPlay <= '1';
+--								nextState <= 10;
+--							when "1001" => -- 9
+--								nextTSelStatus <= '1';
+--							when "1010" => -- 0
+--								nextTSelStatus <= '0';
+--							when others =>		
+--						end case;
+--					end if;
 --				when 7 =>
+--					-- Play sound ("funktion 1")
+--					if(sDone = '1') then 
+--						sSel <= '1';
+--						sPlay <= '1';
+--							nextState <= 11;
+--						if(funcStatus(0) = '1') then
+--							sData <= "1001"
+--						else
+--							sData <= "1010"
+--						end if;
+--					end if;
 --				when 8 =>
+--					-- Play sound ("funktion 2")
+--					if(sDone = '1') then 
+--						sSel <= '1';
+--						sPlay <= '1';
+--							nextState <= 11;
+--						if(funcStatus(1) = '1') then
+--							sData <= "1001"
+--						else
+--							sData <= "1010"
+--						end if;
+--					end if;
 --				when 9 =>
+--					-- Play sound ("funktion 3")
+--					if(sDone = '1') then 
+--						sSel <= '1';
+--						sPlay <= '1';
+--							nextState <= 11;
+--						if(funcStatus(2) = '1') then
+--							sData <= "1001"
+--						else
+--							sData <= "1010"
+--						end if;
+--					end if;
+--				when 10 =>
+--					-- Play sound ("funktion 4")
+--					if(sDone = '1') then 
+--						sSel <= '1';
+--						sPlay <= '1';
+--							nextState <= 11;
+--						if(funcStatus(3) = '1') then
+--							sData <= "1001"
+--						else
+--							sData <= "1010"
+--						end if;
+--					end if;
+--				when 11 =>
+--					-- Play sound ("Till/Fran")
+--					if(sDone = '1') then 
+--						-- Go back to idle state and wait for next command
+--						nextState <= 6;
+--					end if;
 --			
 	end process;
 end Behavioral;
