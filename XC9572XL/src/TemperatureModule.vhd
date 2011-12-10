@@ -5,11 +5,11 @@
 -- EDA234, Group 2
 --
 -- FILE
--- TempModule.vhd
--- Last Updated: 2011-11-22
+-- tempModule.vhd
+-- Last Updated: 2011-12-10
 --
 -- VERSION
--- Hardware ("production") v1.2
+-- Hardware ("production") v1.4
 --
 -- HARDWARE
 -- Target Device: XC9572XL
@@ -20,12 +20,12 @@
 -- DESCRIPTION
 -- Temperature module connected to two DS18S20 temperature sensors
 -- communicating via a 1-wire serial protocol. 
--- Module has to be reset, then the control unit can request a (by setting TRd high)
+-- Module has to be reset, then the control unit can request a (by setting tRd high)
 -- temperature read/conversion from the selected temperature sensor
--- (TSel = 0 or 1 for sensor 0 and 1, respectively). When there is 
+-- (tSel = 0 or 1 for sensor 0 and 1, respectively). When there is 
 -- valid data on the bus (conversion and read cycle finished), the 
--- temperature module responds by setting TAv (Temperature Available) high.
--- The temperature can the be read from the bus (Temp[7..0]).
+-- temperature module responds by setting tAv (temperature Available) high.
+-- The temperature can the be read from the bus (temp[7..0]).
 --
 ----------------------------------------------------------------------------------
 
@@ -34,31 +34,29 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 
-Entity TemperatureModule is
+Entity temperatureModule is
 	port(	 	-- Global clock
 				clk	  	:	in		std_logic;
 				-- Global reset (Internal)
 			   rstInt	:	in		std_logic;
 				-- Temperature Read, trigger signal from Control Unit
-			   TRd	 	:	in		std_logic;
-				-- Signal to MUX, for selecting active sensor (0/1 for DQ0/DQ1, resp.)
-				TSel		:	in		std_logic;
+			   tRd	 	:	in		std_logic;
+				-- Signal to MUX, for selecting active sensor (0/1 for dq0/dq1, resp.)
+				tSel		:	in		std_logic;
 				
 				-- Temperature Available, indicates valid data on temperature output bus
-				TAv		: 	out	std_logic;
+				tAv		: 	out	std_logic;
 				-- Internal temperature data output
-				Temp		:	out	std_logic_vector(7 downto 0);
-				-- Export long delay
-				DelayOut	: 	out	std_logic;
+				temp		:	out	std_logic_vector(7 downto 0);
 				
-				-- Output to 1-Wire bus 1 (Temperature sensor 0)
-			   DQ0     	: 	inout std_logic;
-				-- Output to 1-Wire bus 0 (Temperature sensor 1)
-			   DQ1     	: 	inout std_logic
+				-- Output to 1-Wire bus 1 (temperature sensor 0)
+			   dq0     	: 	inout std_logic;
+				-- Output to 1-Wire bus 0 (temperature sensor 1)
+			   dq1     	: 	inout std_logic
 	);
-end TemperatureModule;
+end temperatureModule;
 
-Architecture Behavioral of TemperatureModule is
+Architecture Behavioral of temperatureModule is
 	
 	-- Internal signal declarations
 	
@@ -67,8 +65,8 @@ Architecture Behavioral of TemperatureModule is
 	signal nextE				: std_logic;
 	
 	-- Valid data on temperature bus
-	signal TAvInt				: std_logic;
-	signal nextTAvInt			: std_logic;
+	signal tAvInt				: std_logic;
+	signal nexttAvInt			: std_logic;
 	
 	-- State variable (as integer)
 	signal state 			 	: integer range 0 to 15;
@@ -80,7 +78,7 @@ Architecture Behavioral of TemperatureModule is
 	
 	-- Internal temperature data output
 	signal tempOut				: std_logic_vector(7 downto 0);
-	signal nextTempOut		: std_logic_vector(7 downto 0);
+	signal nexttempOut		: std_logic_vector(7 downto 0);
 	
 	-- Reading sign bit from sensor
 	signal signBit				: std_logic;
@@ -125,11 +123,9 @@ Architecture Behavioral of TemperatureModule is
 	begin
 	
 	-- Assign internal temperature available signal to output
-	TAv 		<= TAvInt;
+	tAv 		<= tAvInt;
 	-- Assign internal temperature bus to output
-	Temp 		<= tempOut;
-	-- Export long delay
-	DelayOut <= delayLong;
+	temp 		<= tempOut;
 	
 ----------------------------------------------------------------------------------		
 -- SyncP, synchronous (clocked) process responsible for clocking in the new
@@ -152,20 +148,20 @@ Architecture Behavioral of TemperatureModule is
 			sample 	<= '1';
 			E 			<= '0';
 			signBit 	<= '0';
-			TAvInt	<= '0';
+			tAvInt	<= '0';
 		elsif(clk'Event and clk = '1') then
 			state 	<= nextState;
 			ZC 		<= nextZC;
 			E 			<= nextE;
 			-- Increment internal counter
-			cntInt 	<= nextCntInt; -- cntInt + 1; 
+			cntInt 	<= nextCntInt;
 			progress <= nextProgress;
 			bitCnt 	<= nextBitCnt;
 			data 		<= nextData;
 			sample 	<= nextSample;
-			tempOut 	<= nextTempOut;
+			tempOut 	<= nexttempOut;
 			signBit 	<= nextSignBit;
-			TAvInt 	<= nextTAvInt;
+			tAvInt 	<= nexttAvInt;
 		end if;
 	end process;
 	
@@ -175,17 +171,17 @@ Architecture Behavioral of TemperatureModule is
 -- Works as a buffer and MUX for the 1-wire buses
 --
 ----------------------------------------------------------------------------------		
-	BusP : process(E, TSel)
+	BusP : process(E, tSel)
 	begin
 		-- Default : both buses in threestate
-		DQ0 <= 'Z';
-		DQ1 <= 'Z';
+		dq0 <= 'Z';
+		dq1 <= 'Z';
 		-- Drive selected bus low if output enabled
 		if (E = '1') then
-			if(TSel = '0') then
-				DQ0 <= '0';
-			elsif(Tsel = '1') then
-				DQ1 <= '0';
+			if(tSel = '0') then
+				dq0 <= '0';
+			elsif(tSel = '1') then
+				dq1 <= '0';
 			end if;
 	   end if;
 	end process;
@@ -236,7 +232,7 @@ Architecture Behavioral of TemperatureModule is
 -- 4. IDLE (Bus is idle, pulled high by pull-up resistor)
 --
 ----------------------------------------------------------------------------------		
-	ComP : process(Trd, state, delayLong, delayMedium, delayShort, delayTiny, progress, ZC, bitCnt, Tsel, DQ0, DQ1, sample, data, E, tempOut, signBit, TAvInt)
+	ComP : process(tRd, state, delayLong, delayMedium, delayShort, delayTiny, progress, ZC, bitCnt, tSel, dq0, dq1, sample, data, E, tempOut, signBit, tAvInt)
 	begin
 	
 		-- Defaults
@@ -247,9 +243,9 @@ Architecture Behavioral of TemperatureModule is
 		nextSample 		<= sample;
 		nextData 		<= data;
 		nextE 			<= E;
-		nextTempOut 	<= tempOut;
+		nexttempOut 	<= tempOut;
 		nextSignBit 	<= signBit;
-		nextTAvInt 		<= TAvInt;
+		nexttAvInt 		<= tAvInt;
 		
 		case state is
 		
@@ -263,10 +259,10 @@ Architecture Behavioral of TemperatureModule is
 			  nextSignBit 	<= '0';
 			  nextE 	<= '0';
 		    -- Wait for trigger from control unit
-				if(TRd = '1') then
+				if(tRd = '1') then
 				  nextState  <= state + 1;
 				  -- Entering the read cycle - data no longer valid
-				  nextTAvInt <= '0';
+				  nexttAvInt <= '0';
 				end if;
 			when 1 =>
 				-- Enable output and send logical 0
@@ -415,10 +411,10 @@ Architecture Behavioral of TemperatureModule is
 			when 12 =>
 				nextE <= '0';
 				-- MUX'ed sampling from buses
-				if(Tsel = '0') then
-					nextSample <= DQ0;
-				elsif(Tsel = '1') then
-					nextSample <= DQ1;
+				if(tSel = '0') then
+					nextSample <= dq0;
+				elsif(tSel = '1') then
+					nextSample <= dq1;
 				end if;
 				if(delayTiny = '1') then 
 					nextState <= state + 1;
@@ -434,7 +430,13 @@ Architecture Behavioral of TemperatureModule is
 				nextE <= '0';
 				-- Reading 9th bit (temperature sign) and finishing up reading
 				if(signBit = '1') then
-					nextTempOut(7) <= sample;
+					
+					-- Negative temperature, perform 2-com. to sign-value conv.
+					if(sample = '1') then
+						nexttempOut <= (not(tempOut)) + 1;
+					end if;
+					
+					nexttempOut(7) <= sample;
 					nextState <= state + 1;
 					nextProgress <= "00";
 				else
@@ -452,11 +454,11 @@ Architecture Behavioral of TemperatureModule is
 						-- Reading temperature bit
 						if(bitCnt = "000") then
 							nextBitCnt <= (others => '1');
-							nextTempOut(conv_integer(bitCnt)) <= sample;
+							nexttempOut(7-conv_integer(bitCnt)) <= sample;
 							nextSignBit <= '1';
 						else
 							nextBitCnt <= bitCnt - 1;
-							nextTempOut(conv_integer(bitCnt)) <= sample;
+							nexttempOut(7-conv_integer(bitCnt)) <= sample;
 						end if;
 					-- Should not be here. If we are, go back and read again
 					else
@@ -466,7 +468,7 @@ Architecture Behavioral of TemperatureModule is
 			
 			when 15 =>
 				-- Data on TOut bus is now valid. Go back and wait for next trigger.
-				nextTAvInt 	<= '1';
+				nexttAvInt 	<= '1';
 				nextE 		<= '0';
 				nextState 	<= 0;
 						
@@ -477,5 +479,5 @@ Architecture Behavioral of TemperatureModule is
 				
 		end case;	
 	end process;
-
 end Behavioral;
+

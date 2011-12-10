@@ -32,39 +32,50 @@ Entity ControlUnit is
 			  -- Global reset
 				rstInt			: in		std_logic;
 			  
-			  -- Push Buttons (Human Interface)
-				Buttons		: in		std_logic_vector(3 downto 0);
-			  --FuncButton0 	: in   	std_logic;
-			  --FuncButton1 	: in   	std_logic;
-			  --TRdButton 		: in   	std_logic;
-			  --TSelButton 	: in   	std_logic;
+			  -- Switch for ON/OFF (Human Interface)
+				button			: in		std_logic;
 
+			  -- TEMPERATURE MODULE
 			  -- Read Temperature command signal to Temperature module
-				TRd     		: out  	std_logic;
+				tRd     		: out  	std_logic;
 			  -- Select signal for temperature sensors (sensor 0/1)
-				TSel    		: out 	std_logic;
+				tSel    		: out 	std_logic;
 			  -- Temperature Available signal from Temperature module
-				TAv				: in  	std_logic;			  
-			  -- Delay signal (from Temperature module)
-				delay			: in		std_logic;
+				tAv				: in  	std_logic;
 			  
+			  -- FUNCTION MODULE
 			  -- Function control output to Function module
-				Func    		: out  	std_logic_vector(3 downto 0);
+				func    		: out  	std_logic_vector(3 downto 0);
 			  -- Enable signal for Function module
-				En				: out		std_logic;
+				en				: out		std_logic;
 			  
+			   -- DTMF MODULE
 				-- Data input from DTMF module
-				DTMFData		: in  	std_logic_vector(3 downto 0);
+				dData		: in  	std_logic_vector(3 downto 0);
 				-- Data available signal from DTMF module
-				DAv			: in		std_logic;
+				dAv			: in		std_logic;
 				-- Acknowledgement signal to DTMF module
-				Ack			: out		std_logic
+				dAck			: out		std_logic;
 				
-			  -- Will be adding more signals later on. Something like :
-			 
-			  -- R/W'              out (DTMF module)
-			  -- Play              out (Sound module)
-			  -- DoneS             in  (ound module)
+				-- KEYBOARD MODULE
+				-- Data input from keyboard
+				kData			: in		std_logic_vector(3 downto 0);
+				-- Data available signal from keyboard
+				kAv			: in		std_logic;
+				-- Acknowledgement signal from keyboard
+				kAck			: out		std_logic;
+				-- Keyboard Output Enable
+				kOe			: out		std_logic;
+				
+				-- SOUND MODULE
+				-- Done (playing sound) signal from Sound module
+				sDone			: in		std_logic;
+				-- Play signal to Sound module
+				sPlay			: out		std_logic;
+				-- Select signal to Sound module (temp / sound)
+				sSel			: out		std_logic;
+				-- Address bus to Sound Module
+				sAddr			: out		std_logic_vector(3 downto 0)
 	);
 end ControlUnit;
 
@@ -74,69 +85,228 @@ Architecture Behavioral of ControlUnit is
 	signal state 			 	: integer range 0 to 3;
 	signal nextState 		 	: integer range 0 to 3;
 	
-	signal TSelStatus 		: std_logic;
+	signal funcStatus 		: std_logic_vector(3 downto 0);
+	signal nextFuncStatus 	: std_logic_vector(3 downto 0);	
+	
+	signal tSelStatus 		: std_logic;
 	signal nextTSelStatus 	: std_logic;
-  
+	
+	signal sAddrInt			: std_logic_vector(3 downto 0);
+	signal nextSAddrInt		: std_logic_vector(3 downto 0);
+	
+	signal sPlayInt			: std_logic;
+	signal nextSPlayInt		: std_logic;
+		
+	signal sSelInt				: std_logic;
+	signal nextSSelInt		: std_logic;
+	
 	begin
 
-		TSel <= TSelStatus;
-		En <= '1';
+		tSel 	<= tSelStatus;
+		func 	<= funcStatus;
+		sAddr <= sAddrInt;
+		sPlay <= sPlayInt;
+		sSel 	<= sSelInt;
 	
-		SyncP : process(clk, rstInt)
+		-- Synchronous (clocked) process, handing state changes
+		syncP : process(clk, rstInt)
 		begin
 			if(not(rstInt) = '1') then
 				state 		<= 0;
-				TSelStatus 	<= '0';
-				Func 			<= (others => '0');
+				tSelStatus 	<= '0';
+				funcStatus 	<= (others => '0');
+				sAddrInt		<= (others => '0');
+				sPlayInt		<= '0';
+				sSelInt		<= '0';
 			elsif(clk'Event and clk = '1') then
 				state 		<= nextState;
-				TSelStatus 	<= nextTSelStatus;
-				Func <= Buttons(3 downto 2) & "00";
+				tSelStatus 	<= nextTSelStatus;
+				funcStatus 	<= nextFuncStatus;
+				sAddrInt		<= nextSAddrInt;
+				sPlayInt		<= nextSPlayInt;
+				sSelInt		<= nextSSelInt;
 			end if;
 		end process;
 		
-		TempP : process(Buttons, state, delay, TAv, TSelStatus)
+		commandP : process(dAv, dData, kAv, kData, funcStatus, tSelStatus, sSelInt, sAddrInt, sPlayInt)
+		begin
+		
+			kOe				<= '0';
+			nextTSelStatus <= TSelStatus;
+			nextFuncStatus <= FuncStatus;
+			nextSAddrInt 	<= SAddrInt;
+			nextSSelInt		<= SSelInt;
+			nextSPlayInt	<= SPlayInt; 
+			
+			dAck <= '0';
+			kAck <= '0';
+			en <= '0';
+			
+			-- Command from Manual Control Panel
+			if(kAv = '1') then
+				kAck <= '1';
+				case kData(2 downto 0) is
+					when "000" =>	-- 1
+						nextSAddrInt	<= "1111";
+						nextSSelInt 	<= '1';
+						nextSPlayInt 	<= '1';
+						en <= '1';
+						nextFuncStatus(0) <= '1';
+					when "001" =>	-- 2
+						en <= '1';
+						nextFuncStatus(1) <= '1';
+					when "010" =>	-- 3
+						en <= '1';
+						nextFuncStatus(2) <= '1';
+					when "011" =>	-- A
+						nextTSelStatus <= '0';
+					when "100" =>	-- 4
+						en <= '1';
+						nextFuncStatus(0) <= '0';
+					when "101" =>	-- 5
+						en <= '1';
+						nextFuncStatus(1) <= '0';
+					when "110" =>	-- 6
+						en <= '1';
+						nextFuncStatus(2) <= '0';
+					when "111" =>	-- B
+						nextTSelStatus <= '1';
+					--when "1000" => -- 7
+					--	En <= '1';
+					--	nextFuncStatus(3) <= '1';
+					--when "1001" => -- 8
+					--	En <= '1';
+					--	nextFuncStatus(3) <= '0';
+					when others =>
+				end case;
+			-- Command from DTMF Module
+			elsif(dAv = '1') then
+				dAck <= '1';
+				-- Respond to input
+				case dData is
+					when "0001" =>	-- 1
+						en <= '1';
+						nextFuncStatus(0) <= '1';
+					when "0010" =>	-- 2
+						en <= '1';
+						nextFuncStatus(1) <= '1';
+					when "0011" =>	-- 3
+						en <= '1';
+						nextFuncStatus(2) <= '1';
+					when "0100" =>	-- 4
+						en <= '1';
+						nextFuncStatus(0) <= '0';
+					when "0101" =>	-- 5
+						en <= '1';
+						nextFuncStatus(1) <= '0';
+					when "0110" =>	-- 6
+						en <= '1';
+						nextFuncStatus(2) <= '0';
+					when "0111" =>	-- 7
+						en <= '1';
+						nextFuncStatus(3) <= '1';
+					when "1000" => -- 8
+						en <= '1';
+						nextFuncStatus(3) <= '0';
+					when "1001" => -- 9
+						nextTSelStatus <= '1';
+					when "1010" => -- 0
+						nextTSelStatus <= '0';
+					when others =>		
+				end case;
+			end if;
+			
+		end process;
+		
+		-- Process handing the temperature reading and sounds
+		tempP : process(button, state, tAv)
 		begin
 			-- Defaults
 			nextState <= state;
-			nextTSelStatus <= TSelStatus;
-			Ack <= '0';
-			
+--
+--			case state is
+--				when 0 =>
+--					SAddr <= "1000";
+--					SSel <= '1';
+--					nextFuncStatus(2) <= '1';
+--					if(Trig = '1') then
+--						nextState <= state + 1;
+--						SPlay <= '1';
+--					end if;
+--				when 1 =>
+--					if(SDone = '1') then
+--						nextFuncStatus(0) <= '1';
+--						nextState <= state + 1;
+--					end if;
+--				when 2 =>
+--					nextState <= 0;
+--				when others =>
+--					nextState <= 0;
+--			end case; 
+	
 			case state is
 				when 0 =>
 					-- OFF State
-					TRd <= '0';
-					if(Buttons(0) = '1' and delay = '1') then
+					tRd <= '0';
+					if(button = '1') then
 						nextState <= state + 1;
 					end if;
 				when 1 =>
-					TRd <= '1';
-					--nextTSelStatus <= Buttons(1);
-					if(DAv = '1') then
-						Ack <= '1';
-						if (DTMFData = "0001") then 
-							nextTSelStatus <= '1';
-						else 
-							nextTSelStatus <= '0';
-						end if;
-					end if;
-					--if(Buttons(1) = '1' and delay = '1') then
-					--	nextTSelStatus <= not(TSelStatus);
-					--end if;
-					if(delay = '1') then
-						nextState <= state + 1;
-					end if;
+					tRd <= '1';
+					nextState <= state + 1;
 				when 2 =>
-					TRd <= '0';
-					if(delay = '1') then
-						nextState <= state + 1;
-					end if;
+					tRd <= '0';
+					nextState <= state + 1;
 				when 3 =>
-					TRd <= '0';
-					if(TAv = '1' and delay = '1') then
+					tRd <= '0';
+					if(tAv = '1') then
 						nextState <= 0;
 					end if;
 			end case;
-		end process;
+		
+--			case state is
+--				when 0 =>
+--					-- Wait for call in progress
+--					nextState <= state + 1;
+--					TRd <= '1';
+--					nextTSelStatus <= '0';
+--					SData <= "0000";
+--					SPlay <= '1';
+--					SSel <= '1';
+--				when 1 =>
+--					-- Play sound ("temperaturen inne ar")
+--					if(SDone = '1' and TAv = '1') then
+--						SSel <= '0';
+--						SPlay <= '1';
+--						nextState <= state + 1;
+--					end if;
+--				when 2 =>
+--					-- Play indoor temperature
+--					if(SDone = '1') then
+--						SSel <= '1';
+--						TRd <= '1';
+--						nextTSelStatus <= '1';
+--						SData <= "0001";
+--						nextState <= state + 1;
+--					end if;
+--				when 3 =>
+--					-- Play sound ("temperaturen ute ar")
+--					if(SDone = '1' and TAv = '1') then
+--						SSel <= '0';
+--						SPlay <= '1';
+--						nextState <= state + 1;
+--					end if;
+--				when 4 =>
+--					if(SDone = '1') then 
+--						SSel <= '1';
+--						SData <= "0100";
+--						nextState <= state + 1;
+--					end if;
+--				when 6 =>
+--				when 7 =>
+--				when 8 =>
+--				when 9 =>
+--			
+	end process;
 end Behavioral;
 
