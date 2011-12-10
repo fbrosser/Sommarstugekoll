@@ -45,7 +45,7 @@
 	{\noindent \bf Sammanfattning}
 \end{center}
 
-	Ett system för temperaturavläsning och relästyrning beskrivs genom denna rapport. Systemet är åtkomligt och styrbart via telefon genom DTMF (Dual Tone Multiple Frequency). Systemets funktion består i att informera användaren om aktuella temperaturer från två temperatursensorer samt ge användaren möjlighet att via telefon styra utgångarna (till/från) för exempelvis värmeelement eller belysning. Styrning och återkoppling utbytes genom en telefonlinje, POTS (Plain Old Telephone Service) med hjälp av DTMF. \colorbox{yellow}{Sista meningen här är lite konstig. Förslag på omformulering?}
+	Ett system för temperaturavläsning och relästyrning beskrivs genom denna rapport. Systemet är åtkomligt och styrbart via telefon genom DTMF (Dual Tone Multiple Frequency). Systemets funktion består i att informera användaren om aktuella temperaturer från två temperatursensorer samt ge användaren möjlighet att via telefon styra utgångarna (till/från) för exempelvis värmeelement eller belysning. Styrning och återkoppling utbytes genom en telefonlinje, POTS (Plain Old Telephone Service) med hjälp av DTMF.
 
 En tänkt tillämpning för produkten:
 \begin{list}{*}{}
@@ -150,18 +150,18 @@ Funktionsutgångarna kan också styras lokalt med bifogade knappsatsen. Aktuell 
 
 I sitt viloläge väntar systemet på inkommande samtal. Då samtal mottages börjar systemet med att läsa upp ett antal ljudklipp med aktuella temperaturer, och erbjuder sedan användaren möjligheten till att styra de externa funktionerna. Telefonen skickar ut DTMF-signaler, som läses och avkodas av DTMF-transceivern, MT8880, vilken avkodar tvåtonssignalerna för att unikt identifierna nedtryckt knapp och sänder ut denna på databussen till DTMF-modulen. 
 
-Då användaren nedtrycker en knapp sker följande. Motsvarar knapptryckningen ett funktionskommando (funktion till eller från) så sätter CPLD'n statusen för respektive funktionsutgång. \colorbox{yellow}{Lägg eventuellt in andra knapptryckningar som kan motsvara kommandon här}
+Då användaren nedtrycker en knapp kontrollerar styrenheten om knapptryckningen motsvarar ett funktionskommando (funktion till eller från), isåfall sätter CPLD'n statusen för respektive funktionsutgång.
 
 \section{Funktionsenheter}
 \label{sec:Funktionsenheter}
-Systemet är som tidigare nämnt uppdelat i sex funktionsenheter vilka nedan presenteras närmare.
+Systemet är som tidigare nämnt uppdelat i sex funktionsenheter, som presenteras närmare nedan.
 
 	\subsection{Dataväg}
 	Temperaturdatan avläses från temperatursensorer och skickas till temperaturmodulen. Denna skickar sedan datan till ljudmodulen, för vidare uppläsning via ljudlagringskretsen, ISD2560P. Denna data skickas aldrig genom, men kontrolleras av, styrenheten. Den rena datavägen i systemet är alltså här begränsad till CPLD2.
 	
 	\subsection{Styrenhet}
 
-	Styrenheten kontrollerar och ger styrsignaler för att hantera de övriga systemdelarna. Syftet är att ge en lätt överblick över hela körcykeln, där styrenheten har kontroll över funktionerna via en rad styr-, available- och acknowledgesignaler. Styrenheten får även indata från knappsats och DTMF-mottagare via respektive modul som presenterar data för styrenheten. Denna indata är skild från datavägen (temperaturinformation), och meddelar styrenheten om nästföljande steg, dvs. reagera i enlighet med användarsignaler. Se figur ~\ref{fig:RCFlowChart} för flödesschema.
+	Styrenheten kontrollerar och ger styrsignaler för att hantera de övriga systemdelarna. Syftet är att ge en lätt överblick över hela körcykeln, där styrenheten har kontroll över funktionerna via en rad styr-, available- och acknowledgesignaler. Styrenheten får även indata från knappsats och DTMF-mottagare via respektive modul som presenterar data för styrenheten. Denna indata är skild från datavägen (temperaturinformation), och meddelar styrenheten om nästföljande steg, dvs. reagera i enlighet med användarsignaler. Se figur ~\ref{fig:CUFlowChart} för flödesschema.
 
 		\begin{figure}[H]
 		  \centering
@@ -270,7 +270,7 @@ Vid en vanlig uppspelning använder sig ljudmodulen av en 4-bitars adress komman
 			bitCnt & 8 & Anger aktuell bit för överföring/läsning\\\\
 		\end{tabular}
 
-	Se sektion~\ref{sec:programlistningar} ~\nameref{sec:Programlistningar}.
+	Se även VHDL-beskrivning i appendix~\ref{sec:programlistningar}
 
 	\subsection{Extern funktionsstyrning}
 
@@ -284,15 +284,15 @@ för att implementera andra funktioner i systemet.
 Systemet har, förutom DTMF-kontroll, även ett fysiskt gränssnitt med en knappsats samt en till/från-brytare för temperaturläsning.
 Dessa rådata måste formateras, avkodas och presenteras för styrenheten. Detta är knappsatsmodulens uppgift.
 
-Om en knapp på knappsatsen trycks ned, skickas en availablesignal (DAv) från knappsatsen till knappsatsmodulen, som sedan
-avkodar vilken knapp som tryckts ned, och presenterar detta för styrenheten genom att höja en KAv (Keyboard Available)-signal,
-vilket indikerar giltig data på knappsatsdatabussen, KData[3..0]. Genom att skicka en Acknowledgement-signal, KAck, bekräftar 
+Om en knapp på knappsatsen trycks ned, skickas en availablesignal (dAv) från knappsatsen till knappsatsmodulen, som sedan
+avkodar vilken knapp som tryckts ned, och presenterar detta för styrenheten genom att höja en kAv (keyboard available)-signal,
+vilket indikerar giltig data på knappsatsdatabussen, kData[3..0]. Genom att skicka en acknowledgement-signal, kAck, bekräftar 
 styrenheten att den sett och mottagit datan från knappsatsen.
 
 \section{Hårdvara}
 \label{hårdvara}
 	\subsection{ISD2560P}
-ISD2560P är en integrerad inspelning och uppspelningskrets med plats för 60 sekunder ljud. Kretsen är inkopplad enligt ett modifierat förslagsschema i databladet och brukas i sk. Direct Addressing Mode. Kretsen har 10 adresspinnar med 600 giltiga adresser. Var adress förflyttar uppspelningspekaren med 0.1 sekunder (0.1 sekunder * 600 adresser = 60 sekunder). CE pinnen, EoM pinnen och 6 adresspinnar är anslutna till CPLDn. Uppspelningen styrs av den flanktriggade Chip Enable pinnen som är aktiv låg. När denna får en puls så latchas adressvärdena och en uppspelning påbörjas. Uppspelning avslutas med en annan (aktiv låg) puls på End Of Message pinnen.
+ISD2560P är en integrerad inspelnings- och uppspelningskrets med plats för 60 sekunder ljud. Kretsen är inkopplad enligt ett modifierat förslagsschema i databladet och brukas i sk. Direct Addressing Mode. Kretsen har 10 adresspinnar med 600 giltiga adresser. Varje adressinkrementering flyttar uppspelningspekaren med 0.1 sekunder ($0.1 sekunder * 600 adresser$ $= 60 sekunder$). Signalerna {\it ce} (Chip Enable), {\it eom} (End of Message) och en 6-bitars adressbuss är anslutna till CPLDn. Uppspelningen styrs av den flanktriggade Chip Enable-signalen som är aktiv låg. När denna får en puls latchas adressvärdena och en uppspelning påbörjas. Uppspelning avslutas med en annan (aktiv låg) puls på {\it eom}.
 
 De 3 minst signifikanta adressbitarna och den mest signifikanta adressbiten är knutna till jord. Resterande 6 bitar styrs av CPLDn. Inkoppling på detta vis innebär ljudklippslängder i multiplar av 0.8 sekunder. Alla siffror som läses upp ryms i enskilda 0.8 sekundersblock och kan således adresseras utan vidare. Längre ljudklipp kräver aldrig mer än 1.6 sekunder och kan tilldelas block av dubbel längd genom att använda 5-bitarsadressering med en statisk LSB.
 	Se även datablad: \url{http://www.futurlec.com/Others/ISD2560P.shtml}
@@ -311,7 +311,7 @@ De 3 minst signifikanta adressbitarna och den mest signifikanta adressbiten är 
 
 		Då mastern är klar med att skicka över ROM- och Funktions-kommando, kan (beroende på vilka kommandon som sändes) DS18S20-kretsen
 		svara med aktuell data. På samma sätt som ovan måste mastern här initiera en läs-lucka. 
-		DS18S20-kretsen svarar på den allokerade läs-luckan och överför etta eller nolla. Mastern då sampla bussen för att läsa av vad DS18S20-kretsen skickat. All data som skickas från
+		DS18S20-kretsen svarar på den allokerade läs-luckan och överför etta eller nolla. Mastern kan då sampla bussen för att läsa av vad DS18S20-kretsen skickat. All data som skickas från
 		temperatursensorn skickas som LSB-först och i 2-komplementsform. För exakta tidskrav, se datablad:
 		\url{http://datasheets.maxim-ic.com/en/ds/DS18S20.pdf}
 
@@ -325,6 +325,35 @@ Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms ef
 \section{Tillståndsmaskiner}
 \label{sec:Tillstandsmaskiner}		
 \subsection{Styrenhet}
+			Se figur ~\ref{fig:CUSM}\\
+			{\bf Reset:} Alla signaler återställs till sina grundvärden.\\
+			{\bf Grundvärden:} Utgångspunkten är att alla signaler behåller sina gamla värden om inget annat anges.\\
+			\begin{tabular}{l}
+				\\{\bf Viloläge (tillstånd 0):}\\
+				0: Inväntar samtal\\
+				{\bf Temperaturuppläsning (tillstånd 1-5):}\\
+				3: Läser upp ljud ''Temperaturen inne är''\\
+				4: Läser upp innetemperatur\\
+				3: Läser upp ljud ''Temperaturen ute är''\\
+				4: Läser upp utetemperatur\\
+				5: Läser upp ljud ''Funktionskommandotilldelning''\\
+				{\bf Kommando (tillstånd 6):}\\
+				6: Inväntar funktionskommando eller avslutat samtal\\
+				{\bf Funktionstilldelning (Tillstånd 7-11):}\\
+				7: Uppdatera/läs upp funktionsstatus för funktion 1\\
+				8: Uppdatera/läs upp funktionsstatus för funktion 2\\
+				9: Uppdatera/läs upp funktionsstatus för funktion 3\\
+				10: Uppdatera/läs upp funktionsstatus för funktion 4\\
+				11: Läs upp funktionsstatus ''till/från''\\
+			\end{tabular}
+
+	\begin{figure}[H]
+	  \centering
+	      \includegraphics[scale=0.4, angle=0]{ControlUnitStateMachineDiagram.png}
+	  	\caption{State machine-diagram för styrenhet}
+		\label{fig:CUSM}
+	\end{figure}
+
 		\subsection{Temperaturmodul}
 			Se figur ~\ref{fig:TempSM} och förklaring i figur~\ref{fig:SMExp}\\
 			{\bf Reset:} Alla signaler och räknare återställs till sina grundvärden.\\
@@ -369,7 +398,7 @@ Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms ef
 		\subsection{DTMF-Modul}
 
 			Se figur~\ref{fig:DTMFSM}.\\
-			{\bf Reset:} Alla signaler och räknare återställs till sina grundvärden.\\
+			{\bf Reset:} Alla signaler återställs till sina grundvärden.\\
 			{\bf Grundvärden:} Utgångspunkten är att alla signaler är satta till 0 om inget annat anges.\\
 			\begin{tabular}{l}
 				\\{\bf Viloläge (tillstånd 0):}\\
@@ -410,7 +439,7 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 \pagebreak
 
 	\appendix
-	\renewcommand{\appendixpagename}{Appendix}t
+	\renewcommand{\appendixpagename}{Appendix}
 	\appendixpage
 	\renewcommand{\appendixtocname}{Appendix}
 

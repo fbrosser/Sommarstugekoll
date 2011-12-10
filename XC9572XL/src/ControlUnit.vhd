@@ -275,6 +275,7 @@ Architecture Behavioral of ControlUnit is
 --						tRd <= '1';
 --						nextTSelStatus <= '1';
 --						sData <= "0001";
+--						sPlay <= '1';
 --						nextState <= state + 1;
 --					end if;
 --				when 3 =>
