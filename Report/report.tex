@@ -163,9 +163,9 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter vilka nedan pre
 
 	Styrenheten kontrollerar och ger styrsignaler för att hantera de övriga systemdelarna. Syftet är att ge en lätt överblick över hela körcykeln, där styrenheten har kontroll över funktionerna via en rad styr-, available- och acknowledgesignaler. Styrenheten får även indata från knappsats och DTMF-mottagare via respektive modul som presenterar data för styrenheten. Denna indata är skild från datavägen (temperaturinformation), och meddelar styrenheten om nästföljande steg, dvs. reagera i enlighet med användarsignaler. Se figur ~\ref{fig:RCFlowChart} för flödesschema.
 
-		\begin{figure}[ht!tb]
+		\begin{figure}[H]
 		  \centering
-		      \includegraphics[scale=0.5, angle=0]{ControlUnitFlowChart.png}
+		      \includegraphics[scale=0.4, angle=0]{ControlUnitFlowChart.png}
 		  	\caption{Högnivå-flödesdiagram för Kontrollenhet}
 			\label{fig:CUFlowChart}
 		\end{figure}
@@ -193,7 +193,6 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter vilka nedan pre
 
 
 	\subsection{Ljudmodul}
-	\colorbox{yellow}{Inlagt 2011-12-09}
 		Ljudmodulen styr den externa ljudlagringskretsen och signalerar till styrenheten när en uppspelning är färdig. Genom att ställa om värdet av C/T signalen kan styrenheten begära en vanlig ljuduppspelning eller en temperaturuppspelning.
 
 		\subsubsection{Addressering och Uppspelning}
@@ -241,7 +240,7 @@ Vid en vanlig uppspelning använder sig ljudmodulen av en 4-bitars adress komman
 	ger mastern på nytt en initieringspuls för att avbryta läsningen.
 	Den nyligen lästa temperaturen placeras på den interna temperaturbussen, och temperaturmodulen signalerar till styrenheten att giltig data finns på bussen.
 
-		\begin{figure}[ht!tb]
+		\begin{figure}[H]
 		  \centering
 		      \includegraphics[scale=0.5, angle=0]{ReadCycleFlowChart.png}
 		  	\caption{Högnivå-flödesdiagram för Temperaturläscykel}
@@ -293,15 +292,13 @@ styrenheten att den sett och mottagit datan från knappsatsen.
 \section{Hårdvara}
 \label{hårdvara}
 	\subsection{ISD2560P}
-	\colorbox{yellow}{Inlagt 2011-12-09}
 ISD2560P är en integrerad inspelning och uppspelningskrets med plats för 60 sekunder ljud. Kretsen är inkopplad enligt ett modifierat förslagsschema i databladet och brukas i sk. Direct Addressing Mode. Kretsen har 10 adresspinnar med 600 giltiga adresser. Var adress förflyttar uppspelningspekaren med 0.1 sekunder (0.1 sekunder * 600 adresser = 60 sekunder). CE pinnen, EoM pinnen och 6 adresspinnar är anslutna till CPLDn. Uppspelningen styrs av den flanktriggade Chip Enable pinnen som är aktiv låg. När denna får en puls så latchas adressvärdena och en uppspelning påbörjas. Uppspelning avslutas med en annan (aktiv låg) puls på End Of Message pinnen.
 
 De 3 minst signifikanta adressbitarna och den mest signifikanta adressbiten är knutna till jord. Resterande 6 bitar styrs av CPLDn. Inkoppling på detta vis innebär ljudklippslängder i multiplar av 0.8 sekunder. Alla siffror som läses upp ryms i enskilda 0.8 sekundersblock och kan således adresseras utan vidare. Längre ljudklipp kräver aldrig mer än 1.6 sekunder och kan tilldelas block av dubbel längd genom att använda 5-bitarsadressering med en statisk LSB.
-	\colorbox{yellow}{Referens till datablad?}
+	Se även datablad: \url{http://www.futurlec.com/Others/ISD2560P.shtml}
 
 	\subsection{DS18S20}
 	\label{DS18S20}
-		\colorbox{yellow}{Korta ner ännu mer?}
 		Den temperatursensor som används är Maxim DS18S20, som ger temperaturmodulen möjlighet att läsa av temperaturen
 		med nio (9) bitars upplösning. Sensorerna som används i detta system drivs av en extern spänningskälla på +5V,
 		och kommunicerar seriellt över en entrådsbuss. Seriekommunikationen baseras på att bus-mastern initierar skriv-
@@ -315,16 +312,15 @@ De 3 minst signifikanta adressbitarna och den mest signifikanta adressbiten är 
 		Då mastern är klar med att skicka över ROM- och Funktions-kommando, kan (beroende på vilka kommandon som sändes) DS18S20-kretsen
 		svara med aktuell data. På samma sätt som ovan måste mastern här initiera en läs-lucka. 
 		DS18S20-kretsen svarar på den allokerade läs-luckan och överför etta eller nolla. Mastern då sampla bussen för att läsa av vad DS18S20-kretsen skickat. All data som skickas från
-		temperatursensorn skickas som LSB-först och i 2-komplementsform. För exakta tidskrav, se datablad.
-		\colorbox{yellow}{Hänvisning till datablad?}\\
+		temperatursensorn skickas som LSB-först och i 2-komplementsform. För exakta tidskrav, se datablad:
+		\url{http://datasheets.maxim-ic.com/en/ds/DS18S20.pdf}
 
 	\subsection{MT8880C}
 	\label{MT8880C}
-		Avkodning av uppringandes DTMF-signaler avkodas med hjälp av MT8880C från Mittel. 
+		Avkodning av uppringandes DTMF-signaler avkodas med hjälp av MT8880C från Mitel. 
 		Telefonsignalen kopplas direkt in till DTMF-överföraren enligt specifikation för standarsuppkoppling i datablad. Endast avkodningsfunktionen på 		kretsen används. Databuss, R/W-signal, IRQ och $\Phi$2 är anslutna till kontrollenheten. 
 		CS (Chip Select) är satt konstant låg då denna krets använder bussen exklusivt. 
-Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms efter spänningspåslag. Detaljer om initieringscykeln finns i databladet för MT8880C.
-\colorbox{yellow}{Referens till Datablad?} \\
+Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms efter spänningspåslag. Detaljer om initieringscykeln finns i databladet för MT8880C: \url{http://www.cse.chalmers.se/edu/year/2010/course/EDA234/datablad/mt8880.pdf}
 
 \section{Tillståndsmaskiner}
 \label{sec:Tillstandsmaskiner}		
@@ -356,14 +352,14 @@ Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms ef
 				15: Läsning klar, lägg ut temperatur på buss och signalera giltig data. Gå tillbaka till 0\\
 			\end{tabular}
 
-	\begin{figure}[ht!tb]
+	\begin{figure}[H]
 	  \centering
 	      \includegraphics[scale=0.5, angle=0]{StateMachineExplained.png}		
 	  	\caption{Förklaring till state machine-diagram}	
 		\label{fig:SMExp}
 	\end{figure}
 
-	\begin{figure}[ht!tb]
+	\begin{figure}[H]
 	  \centering
 	      \includegraphics[scale=0.4, angle=0]{TempStateMachineDiagram.png}
 	  	\caption{Detaljerat state machine-diagram för temperaturläscykel}
@@ -393,7 +389,7 @@ Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms ef
 				26:  Inväntar bekräftelsesignal från styrenhet\\				
 			\end{tabular}
 
-	\begin{figure}[ht!tb]
+	\begin{figure}[H]
 	  \centering
 	      \includegraphics[scale=0.18, angle=0]{DTMFStateMachineDiagram.png}		
 	  	\caption{Förenklat state machine-diagram för DTMF-Modul}
@@ -461,7 +457,7 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 	 	\end{minipage}
 	\end{table}
 
-		\begin{figure}[ht!tb]
+		\begin{figure}[H]
 		  \centering
 		      \includegraphics[scale=0.48, angle=0]{UserInterface.png}
 			\label{fig:UserInterface}
@@ -469,14 +465,14 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 		\end{figure}
 
 	\section{Blockschema}
-		\begin{figure}[ht!tb]
+		\begin{figure}[H]
 		  \centering
 		      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD1.png}
 			\label{fig:BlockDiagram1}
 		  	\caption{Blockschema (CPLD1)}
 		\end{figure}
 
-		\begin{figure}[ht!tb]
+		\begin{figure}[H]
 		  \centering
 		      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD2.png}
 			\label{fig:BlockDiagram2}
@@ -485,7 +481,7 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 
 	\section{Komponentlista}
 
-		\begin{tabular}{ l r}
+		\begin{tabular}{l r}
 		   	Matningsspänning & +5V\\
 		   	Strömförbrukning & ~80mA\\
 		   	Temperaturmätspann & +/- 31.5 C\\
@@ -494,7 +490,7 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 
 	\section{Kretsschema}
 
-		\begin{figure}[ht!tb]
+		\begin{figure}[H]
 		  \centering
 		      \includegraphics[scale=0.7, angle=0]{schema.png}
 			\label{fig:schema}
@@ -503,16 +499,16 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 
 	\section{Kretskortslayout}
 
-	\begin{figure}[ht!tb]
+	\begin{figure}[H]
 	  \centering
-	      \includegraphics[scale=0.7, angle=0]{layout.png}
+	      \includegraphics[scale=0.7, angle=0]{Layout.png}
 		\label{fig:layout}
 	  	\caption{Kretskortslayout}
 	\end{figure}
 	
 	\section{Timingdiagram}
 
-		\begin{figure}[ht!tb]
+		\begin{figure}[H]
 		  \centering
 		      \includegraphics[scale=0.5, angle=0]{TempTiming.png}
 			\label{fig:TempTiming}
