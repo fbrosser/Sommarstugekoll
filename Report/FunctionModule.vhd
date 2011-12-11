@@ -16,7 +16,7 @@
 -- The Function Module is a simple module responsible for keeping track of and
 -- updating the status (on/off) of the functions used.
 --
-----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;

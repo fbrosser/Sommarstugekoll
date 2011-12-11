@@ -15,7 +15,7 @@
 -- DESCRIPTION
 -- The Control Unit. Responsible for the complete system usage cycle.
 --
-----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;

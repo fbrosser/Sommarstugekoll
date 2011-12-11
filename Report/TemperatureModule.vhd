@@ -1,4 +1,4 @@
-----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- Temperature Module
 -- DS18S20 1-Wire Communication
 -- EDA234, Group 2
@@ -23,8 +23,7 @@
 -- temperature module responds by setting tAv (temperature Available) high.
 -- The temperature can the be read from the bus (temp[7..0]).
 --
-----------------------------------------------------------------------------------
-
+--------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
@@ -123,14 +122,14 @@ Architecture Behavioral of temperatureModule is
 	-- Assign internal temperature bus to output
 	temp 		<= tempOut;
 	
-----------------------------------------------------------------------------------		
+--------------------------------------------------------------------------------	
 -- SyncP, synchronous (clocked) process responsible for clocking in the new
 -- states according to nextState
 --
 -- NB! : This is the only clocked process, 
 -- keeping track of all state or value updates (current => next)
 --
-----------------------------------------------------------------------------------		
+--------------------------------------------------------------------------------		
 	SyncP : process(clk, rstInt)
 	begin
 		if(not(rstInt) = '1') then 
@@ -161,12 +160,12 @@ Architecture Behavioral of temperatureModule is
 		end if;
 	end process;
 	
-----------------------------------------------------------------------------------		
+--------------------------------------------------------------------------------		
 -- BusP, process responsible for handling the buffered output to the bus,
 -- according to the enable signal.
 -- Works as a buffer and MUX for the 1-wire buses
 --
-----------------------------------------------------------------------------------		
+--------------------------------------------------------------------------------		
 	BusP : process(E, tSel)
 	begin
 		-- Default : both buses in threestate
@@ -182,11 +181,11 @@ Architecture Behavioral of temperatureModule is
 	   end if;
 	end process;
 	
-----------------------------------------------------------------------------------		
+--------------------------------------------------------------------------------	
 -- CountP, internal counter responsible for creating pulses with certain
 -- time intervals. Uses a local (to the Architecture) counter variable.
 --
-----------------------------------------------------------------------------------				
+--------------------------------------------------------------------------------				
 	CountP : process(cntInt)
 	begin
 		-- Increment internal counter
@@ -218,7 +217,7 @@ Architecture Behavioral of temperatureModule is
 		end if;  
 	end process;
 	
-----------------------------------------------------------------------------------		
+--------------------------------------------------------------------------------	
 -- ComP, State Machine handling the master side of the 1-wire bus
 -- communication with the DS18S20. Divided into stages/modes as follows:
 --  
@@ -227,7 +226,7 @@ Architecture Behavioral of temperatureModule is
 -- 3. READ (Master reads data from DS18S20)
 -- 4. IDLE (Bus is idle, pulled high by pull-up resistor)
 --
-----------------------------------------------------------------------------------		
+--------------------------------------------------------------------------------		
 	ComP : process(tRd, state, delayLong, delayMedium, delayShort, delayTiny, progress, ZC, bitCnt, tSel, dq0, dq1, sample, data, E, tempOut, signBit, tAvInt)
 	begin
 	
@@ -245,9 +244,9 @@ Architecture Behavioral of temperatureModule is
 		
 		case state is
 		
-----------------------------------------------------------------------------------		  
+--------------------------------------------------------------------------------		  
 -- INIT
-----------------------------------------------------------------------------------		
+--------------------------------------------------------------------------------	
 			when 0 =>
 			  -- Initialization of signals
 			  nextProgress <= "00";
@@ -280,9 +279,9 @@ Architecture Behavioral of temperatureModule is
 					nextState <= state + 1;
 				end if;
 				
-----------------------------------------------------------------------------------		  
+--------------------------------------------------------------------------------		  
 -- SEND
-----------------------------------------------------------------------------------  
+--------------------------------------------------------------------------------
       -- Prepare for transmit of the byte in data
 		  when 4 =>
 			  -- Release bus and delay
@@ -374,17 +373,17 @@ Architecture Behavioral of temperatureModule is
 			         nextState 		<= 0;
 			   end case;
 				
-----------------------------------------------------------------------------------		  
+--------------------------------------------------------------------------------		  
 -- READ
-----------------------------------------------------------------------------------		  
-----------------------------------------------------------------------------------		  
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------		  
 --
 -- Master reads 9 bytes from the bus, starting with LSB of Byte 0
 -- However, we are only interested in the temperature registers (Byte 0 and 1),
 -- so a reset pulse is given after nine bits (8 temp + 1 sign) have been read,
 -- telling the DS18S20 to discontinue transfer.
 --
-----------------------------------------------------------------------------------  
+--------------------------------------------------------------------------------
 			-- Delay and prepare for read phase
 			when 9 =>
 				nextE <= '0';

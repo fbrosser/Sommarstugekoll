@@ -16,7 +16,7 @@
 -- DTMF Module, responsible for decoding DTMF data and presenting it
 -- to the control unit.
 --
-----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
