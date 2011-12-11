@@ -356,8 +356,6 @@ De 3 minst signifikanta adressbitarna och den mest signifikanta adressbiten är 
 		cs (Chip Select) är satt konstant låg då denna krets använder bussen exklusivt. 
 Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms efter spänningspåslag. Detaljer om initieringscykeln finns i databladet för MT8880C, se Appendix~\ref{sec:datablad}.
 
-\pagebreak
-
 \section{Tillståndsmaskiner}
 
 	Nedan beskrivs modulernas tillståndsmaskiner. Varje tillståndsmaskin presenteras
@@ -715,9 +713,14 @@ U4 & - & ISD2560 \\
 		eom & IDS2560P & Ljudmodul & End-Of-Message från ISD2560P\\\\
 	\end{tabular}
 	\end{table}
-
+\pagebreak
 	\section{Arbetsfördelning}
 	\label{sec:arbetsSec}
+	
+		Det har varit mycket samarbete, där alla samarbetat med alla olika moduler. \\
+		Nedan följer en uppdelning i stora drag vem haft det övergripande ansvaret för de större momenten. \\
+		Alla har jobbat med felsökning, rapportskrivning och uppkoppling.
+	
 	\begin{table} [H]
 	\caption{Arbetsfördelning, tabell} 
 	\label{tab:arbetsTabell}
@@ -725,11 +728,7 @@ U4 & - & ISD2560 \\
 		\begin{tabular}{l l l}
 		{\bf Arbetsfördelning}
 		
-		Det har varit mycket samarbete, där alla samarbetat med alla olika moduler. Nedan följer en uppdelning
-		i stora drag vem haft det övergripande ansvaret för de större momenten. Alla har jobbat med felsökning,
-		rapportskrivning och uppkoppling.
-		
-		\\{\it Namn} \\ {Moduler / Ansvar} \\ {Övrigt}\\
+		\\{\it Namn} \\ {Moduler / Ansvar} \\ {Övrigt}\\\\
 		\hline
 				{\it Fredrik Brosser}\\
 				 Temperaturmodul, DS18S20, Styrenhet, Funktioner/Knappsats\\
@@ -745,7 +744,7 @@ U4 & - & ISD2560 \\
 				 Rapport\\
 		\end{tabular}
 	\end{table}
-		
+\pagebreak
 	\section{Datablad}
 	
 	\label{sec:datablad}
