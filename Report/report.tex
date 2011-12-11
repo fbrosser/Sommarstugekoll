@@ -10,12 +10,33 @@
 \usepackage{appendix}
 \usepackage{caption}
 \usepackage{float}
+\usepackage{listings}
 
 % Swedish
 \usepackage[swedish]{babel}
 
 % Table of contents depth 3 levels: A.B.C
 \setcounter{tocdepth}{3}
+
+\lstset{ %
+language=VHDL,                  % the language of the code
+basicstyle=\tiny,       	% the size of the fonts that are used for the code
+numbers=left,                   % where to put the line-numbers
+numberstyle=\tiny,      	% the size of the fonts that are used for the line-numbers
+stepnumber=5,                   % the step between two line-numbers. If it's 1, each line will be numbered
+numbersep=5pt,                  % how far the line-numbers are from the code
+backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+frame=single,                   % adds a frame around the code
+tabsize=2,                      % sets default tabsize to 2 spaces
+captionpos=t,                   % sets the caption-position to top
+breaklines=true,                % sets automatic line breaking
+breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+title=\lstname,                 % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
 
 \begin{document}
 
@@ -30,17 +51,13 @@
 		\texttt{wolgers} & \texttt{@} & \texttt{student.chalmers.se}\\\\
 	\end{tabular}
 	}
+	
+ \thispagestyle{empty}
+\pagebreak
 
 \maketitle
  \thispagestyle{empty}
-\pagebreak
- \thispagestyle{empty}
-	\tableofcontents
- \thispagestyle{empty}
-
-\pagebreak
-
-
+\pagebreak
 \begin{center}
 	{\noindent \bf Sammanfattning}
 \end{center}
@@ -58,11 +75,11 @@ En tänkt tillämpning för produkten:
 	{\noindent \bf Abstract}
 \end{center}
 
-	The system described in this report is an automated domestic temperature control system, accessible and controllable via
+	The system described in this report is an automated domestic temperature monitoring system, accessible and controllable via
 	telephone. The main function of the system is to inform the user of the current temperatures
 	at the points of measurement, and also to give the user remote binary control (on/off) of a number of external
 	functions. These functions could for example be heating systems, radiators, or air conditioning. Information- and control data
-	is exchanged via a standard analog telephone connection using DTMF (Dual Tone, Multiple Frequency).
+	is exchanged via a standard analog telephone connection, POTS (Plain Old Telephone Service) using DTMF (Dual Tone, Multiple Frequency).
 
 	A specific, practical application is of the concerned holiday home owner wanting to monitor and control the temperature 
 	in his or her vacation property. Using Sommarstugekoll it is possible to keep heating expenditures to a minimum while at 
@@ -71,42 +88,45 @@ En tänkt tillämpning för produkten:
 	Should the owner wish to visit the property, he or she needs only to dial the house telephone prior to arrival and instruct the system to raise
 	the interior temperature to a comfortable level. 
 
+\pagebreak
+
  \thispagestyle{empty}
+	\tableofcontents
+ \thispagestyle{empty}
+
 \pagebreak
 
 \setcounter{page}{1}
 \section{Introduktion}
 
 	Konstruktionsprojektet utförs inom kursen ``Digital Konstruktion, EDA234'' vid Chalmers Tekniska Högskola. Uppgiften består att inom gruppen om 4 personer konstruera och dokumentera
-	ett digitalsystem utifrån en specifikation, med fokus på huvudfunktionalitet i det digitala området. Utvecklingen sker på ett färdigt utvecklingskort vilket sedan kompletteras med externa kretsar och programmeras för att nå kravspecefikationen. Logikkretsen som används är en Xilinx XC9572XL CPLD, och utveckligen sker i huvudsak med VHDL i Xilinx ISE-miljön samt i ModelSim för simuleringar. Rapporten är uppdelad i abstraktionslager med fördjupningar i de senare avsnitten. 
+	ett digitalt system utifrån en specifikation, med fokus på huvudfunktionalitet i det digitala området. För en beskrivning av arbetsfördelningen inom gruppen, se Appendix~\ref{sec:arbetsSec}. Utvecklingen sker på ett färdigt utvecklingskort vilket sedan kompletteras med externa kretsar och programmeras för att nå kravspecefikationen. Logikkretsen som används är en Xilinx XC9572XL CPLD, och utveckligen sker i huvudsak med VHDL i Xilinx ISE-miljön samt i ModelSim för simuleringar. Rapporten är uppdelad i abstraktionslager med fördjupningar i de senare avsnitten. 
 
 	En handhavandeinstruktion återfinns bifogad i Appendix~\ref{sec:Manual}.
 
 \pagebreak
 
 \section{Kravspecifikation och systembeskrivning}
-	Systemet består av en styrenhet placerad på två CPLD med anslutning till telefonnätet. Styrenheten har med hjälp av en DTMF avkodare möjlighet att tolka användarens telefonknapptryckningar på distans. Vidare kan användaren genom dessa knapptryckningar skicka signal för att hämta datavärde från någon av de två temperaturgivarna anslutna med entrådsbus. En röstenhet läser sedan upp ett förinspelat meddelande för respektive temperatur. Vidare kan användaren också starta eller stoppa någon av de funktionsutgångar som finns till hands, användaren får då akustisk återkoppling om aktuell status för funktionsutgången via samma ljudmodul.
+	Systemet består av en styrenhet placerad på två CPLD med anslutning till telefonnätet. Styrenheten har med hjälp av en DTMF avkodare möjlighet att tolka användarens telefonknapptryckningar på distans. Vidare kan användaren genom dessa knapptryckningar skicka signal för att hämta värde från någon av de två temperaturgivarna anslutna med entrådsbus. En röstenhet läser sedan upp ett förinspelat meddelande för respektive temperatur. Vidare kan användaren också starta eller stoppa någon av de funktionsutgångar som finns till hands, användaren får då akustisk återkoppling om aktuell status för funktionsutgången via samma ljudmodul.
 
 Funktionsutgångarna kan också styras lokalt med bifogade knappsatsen. Aktuell status för funktionsutgångarna visas med lysdioder. 
 
 	\subsection{Tolkning och definition av kravspecifikation}
 
-		Inom det tilltänkta användningsområdet, ett fritidshus med POTS-linje som under större delen av året endast nyttjas tillfälligtvis, är det rimligt med en temperatur om $5-10\,^{\circ}\mathrm{C}$ då ingen vistas i huset. Vidare bör det vara önskvärt att ha möjlighet att slå till normal värme innan ett besök, kunna kontrollera att det blivit varmt samt att kontrollera att temperaturen är över $0\,^{\circ}\mathrm{C}$. Systemet kan därför tolka en temperatur om $\pm 32\,^{\circ}\mathrm{C}$ från givarna med en upplösning om $\pm 1\,^{\circ}\mathrm{C}$. Senast avläst temperatur visas också binärt på LED-displayen.
-
-		Systemet matas med en spänning om $5\,V$ DC, då systemet är till indikeras detta med en lysdiod.
+		Inom det tilltänkta användningsområdet, ett fritidshus med POTS-linje som under större delen av året endast nyttjas tillfälligtvis, är det rimligt med en temperatur om $5-10\,^{\circ}\mathrm{C}$ då ingen vistas i huset. Vidare bör det vara önskvärt att ha möjlighet att slå till normal värme innan ett besök, kunna kontrollera att det blivit varmt samt att kontrollera att temperaturen är över $0\,^{\circ}\mathrm{C}$. Systemet kan därför tolka en temperatur om $\pm 32\,^{\circ}\mathrm{C}$ från givarna med en upplösning om $\pm 1\,^{\circ}\mathrm{C}$. Senast avläst temperatur visas också binärt på LED-displayen. Systemet matas med en spänning om $5\,V$ DC, då systemet är till indikeras detta med en lysdiod.
 
 	\subsection{Uppdelning}
 
 	Systemet är uppdelat i ett antal delblock (moduler) och är konstruerat för att vara så modulärt som möjligt.
-	Nedan följer en sammanfattande tabell över hur de olika modulerna är uppdelade på de två CPLD:erna. Varje modul är mer
+	I tabell ~\ref{tab:uppdelningstabell} nedan finns en beskrivning över hur de olika modulerna är uppdelade på de två CPLD:erna. Varje modul är mer
 	utförligt beskriven i respektive sektion under rubriken ~\ref{sec:Funktionsenheter} \nameref{sec:Funktionsenheter}. 
 
-	I blockschema som återfinns i figur~\ref{fig:blocks1} och~\ref{fig:blocks2} visas respektive modul och uppdelningen på två CPLD samt dess kommunikationsvägar. I tabell~\ref{tab:uppdelningstabell} förklaras respektive modul samt vilken CPLD som innehåller denna.\\\\
+	I blockschema som återfinns i figur~\ref{fig:blocks1} och~\ref{fig:blocks2} visas respektive modul och uppdelningen på två CPLD samt dess kommunikationsvägar. För större figurer, se Appendix~\ref{sec:BlockAppendix}.\\
 
 	\begin{figure} [H]
 		  	
 			\centering
-			\includegraphics[width=1\textwidth]{BlockDiagramCPLD1.png}
+			\includegraphics[width=1\textwidth, height = 0.40\textwidth]{BlockDiagramCPLD1.png}
 		  	\caption{Blockdiagram för CPLD1}
 			\label{fig:blocks1}
 	\end{figure}
@@ -114,7 +134,7 @@ Funktionsutgångarna kan också styras lokalt med bifogade knappsatsen. Aktuell 
 	\begin{figure}[H]
 		  	
 			\centering
-			\includegraphics[width=1\textwidth]{BlockDiagramCPLD2.png}
+			\includegraphics[width=1\textwidth, height = 0.40\textwidth]{BlockDiagramCPLD2.png}
 			\caption{Blockdiagram för CPLD2}
 			\label{fig:blocks2}
 	\end{figure}
@@ -143,14 +163,14 @@ Funktionsutgångarna kan också styras lokalt med bifogade knappsatsen. Aktuell 
 	\end{table}
 	
 	Systemet är uppdelat enligt ``dataväg-styrenhet-modellen'', där designprincipen går ut på att skilja styrsignaler
-	och dataflödeskontroll (Styrenheten) från datan som forslas genom systemet (Datavägen). Systemet skickar temperaturdata från temperaturmodulen till ljudmodulen samt adressdata till ljludlagringsenheten från ljudmodulen. Detta flöde kontrolleras från styrenheten via
+	och dataflödeskontroll (styrenheten) från datan som forslas genom systemet (datavägen). Systemet skickar temperaturdata från temperaturmodulen till ljudmodulen samt adressdata till ljludlagringsenheten från ljudmodulen. Detta flöde kontrolleras från styrenheten via
 	enkla styrsignaler. Viss data, i form av indata från användargränssnitt och styrsignaler till funktionsutgångar, passerar dock genom styrenheten.
 
 	\subsection{Arbetsflöde}
 
-I sitt viloläge väntar systemet på inkommande samtal. Då samtal mottages börjar systemet med att läsa upp ett antal ljudklipp med aktuella temperaturer, och erbjuder sedan användaren möjligheten till att styra de externa funktionerna. Telefonen skickar ut DTMF-signaler, som läses och avkodas av DTMF-transceivern, MT8880, vilken avkodar tvåtonssignalerna för att unikt identifierna nedtryckt knapp och sänder ut denna på databussen till DTMF-modulen. 
+I sitt viloläge väntar systemet på inkommande samtal. Då samtal mottages börjar systemet med att läsa upp ett antal ljudklipp med aktuella temperaturer, och erbjuder sedan användaren möjligheten till att styra de externa funktionerna. Telefonen skickar ut DTMF-signaler, som läses och avkodas av DTMF-transceivern, MT8880C, vilken avkodar tvåtonssignalerna för att unikt identifierna nedtryckt knapp och sänder ut denna på databussen till DTMF-modulen. 
 
-Då användaren nedtrycker en knapp kontrollerar styrenheten om knapptryckningen motsvarar ett funktionskommando (funktion till eller från), isåfall sätter CPLD'n statusen för respektive funktionsutgång.
+Då användaren nedtrycker en knapp kontrollerar styrenheten om knapptryckningen motsvarar ett funktionskommando (funktion till eller från), i så fall sätts statusen för respektive funktionsutgång.
 
 \section{Funktionsenheter}
 \label{sec:Funktionsenheter}
@@ -165,7 +185,7 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter, som presentera
 
 		\begin{figure}[H]
 		  \centering
-		      \includegraphics[scale=0.4, angle=0]{ControlUnitFlowChart.png}
+		      \includegraphics[scale=0.35, angle=0]{ControlUnitFlowChart.png}
 		  	\caption{Högnivå-flödesdiagram för Kontrollenhet}
 			\label{fig:CUFlowChart}
 		\end{figure}
@@ -174,7 +194,7 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter, som presentera
 
 	Styrenheten är i sin tur modulärt uppbyggd, och har ett väl avgränsat interface mot varje annan delmodul, men fungerar samtidigt som en samordnare mellan de olika modulerna.	För en ingående grafisk beskrivning av den bakomliggande tillståndsmaskinen, se sektion~\ref{sec:Tillstandsmaskiner} ~\nameref{sec:Tillstandsmaskiner}.
 
-	\subsection{DTMF-Modul}
+	\subsection{DTMF-modul}
 		
 	DTMF-modulen i CPLD1 är ansvarig för att hantera kommunikation med telefonen och därmed också med användaren.
 	När användaren trycker ner en knapp på telefonen genereras en DTMF-signal som uppfattas och avkodas av DTMF-modulen vilken sedan presenterar den mottagna indatan för styrenheten.
@@ -183,26 +203,26 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter, som presentera
 
 	DTMF-modulen måste få en initieringspuls minst 100 ms efter spänningspåslag. Detta sker med hjälp av
 	en extern tryckknapp, som beskrivet i användarmanualen. Under hela initieringen är Chip Select satt låg
-	och RS0 satt hög. Initieringscykeln börjar med att DTMF-modulen läser statusregistret och ger kommandon genom att skriva till kontrollregistret på MT8880-kretsen enligt ett i databladet givet mönster. Se även sektion ~\ref{MT8880C} under~\nameref{hårdvara} för vidare beskrivning.
-	DTMF-Modulen är ansvarig för att ge ut rätt signaler under initieringsfasen, vilket görs med hjälp av en tillståndsmaskin. Denna finns beskriven i sektion~\ref{sec:Tillstandsmaskiner} ~\nameref{sec:Tillstandsmaskiner}.
+	och RS0 satt hög. Initieringscykeln börjar med att DTMF-modulen läser statusregistret och ger kommandon genom att skriva till kontrollregistret på MT8880C-kretsen enligt ett i databladet givet mönster. Se även sektion ~\ref{MT8880C} under~\nameref{hårdvara} för vidare beskrivning.
+	DTMF-modulen är ansvarig för att ge ut rätt signaler under initieringsfasen, vilket görs med hjälp av en tillståndsmaskin. Denna finns beskriven i sektion~\ref{sec:Tillstandsmaskiner} ~\nameref{sec:Tillstandsmaskiner}.
 		
 	\subsubsection{Läsning}
 
-	Då initieringen av MT8880C är färdigställd går DTMF-Modulen över i ett läsläge, där den kontinuerligt lyssnar efter insignaler från MT8880C-kretsen. När giltig indata detekteras läses den och läggs ut på den interna DTMF-databussen till styrenheten, varpå DTMF-Modulen ger signal  ``dAv'' till styrenheten. DTMF-modulen väntar sedan på en bekräftelsesignal (dAck) från styrenheten. Läsningen sker genom att DTMF-modulen väntar på signal på avbrottsutgången (IRQ) vilket betyder att en ny DTMF-signal detekterats  och avkodats från telefonlinjen och lagts ut på databussen från MT8880C'n.
+	Då initieringen av MT8880C är färdigställd går DTMF-modulen över i ett läsläge, där den kontinuerligt lyssnar efter insignaler från MT8880C-kretsen. När giltig indata detekteras läses den och läggs ut på den interna DTMF-databussen till styrenheten, varpå DTMF-modulen ger signal  ``dAv'' till styrenheten. DTMF-modulen väntar sedan på en bekräftelsesignal (dAck) från styrenheten. Läsningen sker genom att DTMF-modulen väntar på signal på avbrottsutgången (IRQ) vilket betyder att en ny DTMF-signal detekterats  och avkodats från telefonlinjen och lagts ut på databussen från MT8880C-kretsen.
 
 
 	\subsection{Ljudmodul}
 		Ljudmodulen styr den externa ljudlagringskretsen och signalerar till styrenheten när en uppspelning är färdig. Genom att ställa om värdet av C/T signalen kan styrenheten begära en vanlig ljuduppspelning eller en temperaturuppspelning.
 
-		\subsubsection{Addressering och Uppspelning}
-När styrenheten begär en temperaturuppspelning så börjar ljudmodulen att läsa av temperaturmodulens databuss. Om temperaturen är giltig (dvs. innanför det giltiga mätspannet) så skickar ljudmodulen ut de 6 minst signifikanta bitarna av temperaturen direkt till ljudkretsen och triggar en uppspelning. Ljudkretsen är programmerad på sådant vis att temperaturbussens värde är mappat 1:1 till det korrekta ljudklippet.  Om en overflow har skett så ställs temperaturen helt enkelt till det högsta giltiga värdet och uppspelningen fortsätter. Efter att själva temperaturen är färdiguppspelad så granskar ljudmodulen åter igen temperaturbussen och spelar upp "minusgrader" eller "plusgrader" beroende på vilken sida nollstrecket man befinner sig på. Därefter signaleras styrenheten att uppspelningen är färdig.
+		\subsubsection{Adressering och uppspelning}
+När styrenheten begär en temperaturuppspelning så börjar ljudmodulen att läsa av temperaturmodulens databuss. Om temperaturen är giltig (dvs. innanför det giltiga mätspannet) så skickar ljudmodulen ut de 6 minst signifikanta bitarna av temperaturen direkt till ljudkretsen och triggar en uppspelning. Ljudkretsen är programmerad på sådant vis att temperaturbussens värde är mappat 1:1 till det korrekta ljudklippet.  Om en overflow har skett så ställs temperaturen helt enkelt till det högsta giltiga värdet och uppspelningen fortsätter. Efter att själva temperaturen är färdiguppspelad så granskar ljudmodulen åter igen temperaturbussen och spelar upp ''minusgrader'' eller ''plusgrader'' beroende på vilken sida nollstrecket man befinner sig på. Därefter signaleras styrenheten att uppspelningen är färdig.
 
-Vid en vanlig uppspelning använder sig ljudmodulen av en 4-bitars adress kommande från styrenheten. Innan uppspelning förlängs denna till 6 bitar genom att lägga till en ny statisk MSB och en ny statisk LSB. Adressen "kläms" på så sätt in mellan två nya bitar. Anledningen för den udda förlängningen beror på att ljudklippen som styrenheten begär kräver mer lagringsutrymme på ljudkretsen än vad temperaturerna gör. Hårdvarubeskrivningen förklarar detta i mer detalj.
+Vid en vanlig uppspelning använder sig ljudmodulen av en 4-bitars adress kommande från styrenheten. Innan uppspelning förlängs denna till 6 bitar genom att lägga till en ny statisk MSB och en ny statisk LSB. Adressen läggs på så sätt in mellan två nya bitar. Anledningen för den udda förlängningen beror på att ljudklippen som styrenheten begär kräver mer lagringsutrymme på ljudkretsen än vad temperaturerna gör. Hårdvarubeskrivningen förklarar detta mer i detalj.
 
 	\subsection{Temperaturmodul}
 
 	Temperaturmodulen är ansvarig för att hantera seriekommunikationen med 
-	DS18S20-temperatursensorerna, via entrådsbussarna, samt att ge ut de lästa temperaturerna
+	temperatursensorerna DS18S20, via entrådsbussarna, samt att ge ut de lästa temperaturerna
 	i tecken-belopp-format, där den mest signifikanta biten ger tecknet (positiv eller negativ) och efterföljande bitar temperaturdatan binärt.
 	Temperaturerna skickas via en intern databuss till ljudmodulen, i syfte att låta den i sin tur spela upp de avlästa temperaturen för användaren. 
 	För vidare beskrivning av temperatursensorkretsen, se sektion ~\ref{DS18S20} under~\nameref{hårdvara}.
@@ -210,8 +230,8 @@ Vid en vanlig uppspelning använder sig ljudmodulen av en 4-bitars adress komman
 	\subsubsection{Entrådsbuss}
 
 	Temperaturmodulen kommunicerar seriellt med temperatursensorn över en entrådsbuss.
-	Entrådsbussen är ansluten till matningsspänning (+5V) genom ett pull-up-motstånd på 4.7kOhm, och
-	ändarna av bussen är anslutna till mastern (CPLD) och sensorn (DS18S20), respektive. När information
+	Entrådsbussen är ansluten till matningsspänning genom ett pull-up-motstånd.
+	Ändarna av bussen är anslutna till CPLD och sensor, respektive. När information
 	skickas över bussen drar den sändande enheten bussen låg genom att driva den
 	med en stark logisk nolla.
 
@@ -221,7 +241,7 @@ Vid en vanlig uppspelning använder sig ljudmodulen av en 4-bitars adress komman
 
 	(Se även figur ~\ref{fig:RCFlowChart} för en flödesdiagram-beskrivning av en hel läscykel.)
 
-	Initialiseringen består i av att mastern driver bussen låg i 512 us och sedan släpper den.
+	Initialiseringen består av att mastern driver bussen låg i 512 us och sedan släpper den.
 	Temperatursensorn svarar då med en närvaro-puls genom att driva bussen låg i 106 us.
 
 	Då mastern detekterat närvaropulsen börjar den överföra ett ROM-kommando (Skip ROM, 0xCC), följt av en kort återhämtningslucka och sedan ett Funktions-kommando (Convert Temperature, 0x44).
@@ -231,13 +251,13 @@ Vid en vanlig uppspelning använder sig ljudmodulen av en 4-bitars adress komman
 	sänder förfrågningar genom att dra bussen låg i en kort period (4 us). Temperatursensorn svarar med en nolla
 	då konvertering sker, och en etta då konverteringen är klar.
 	Då mastern ser att konverteringen är klar, initialiseras temperatursensorn om och ytterligare ett ROM-Funktions-kommandopar överförs. Dessa är 0xCC (Skip ROM) följt av 0xBE (Read Scratchpad), respektive.
-	Idealt ska temperatursensorkretsen nu vara redo att överföra temperaturdata till mastern från sitt interna 9-bytesminne.
+	Temperatursensorn är då redo att överföra temperaturdata till mastern från sitt interna 9-bytesminne.
 	Då den ger Read Scratchpad-kommandot börjar DS18S20 sända innehållet i sitt minne över bussen.
 	Mastern går då in i läsningsläget och börjar sampla datan på bussen genom att driva bussen låg, släppa den och sampla efter 4 us.
 	Mastern samplar de första åtta bitarna som sänds av DS18S20, sedan en ytterligare, nionde bit. 
 	Den sista biten utgör en tecken-bit för att avgöra om temperaturen är positiv eller negativ. Då den nionde biten data lästs
 	ger mastern på nytt en initieringspuls för att avbryta läsningen.
-	Den nyligen lästa temperaturen placeras på den interna temperaturbussen, och temperaturmodulen signalerar till styrenheten att giltig data finns på bussen.
+	Den nyligen lästa temperaturen placeras på den interna temperaturbussen, och temperaturmodulen signalerar till styrenheten att giltig data finns på bussen. För timingdiagram, se Appendix~\ref{fig:TempTiming}.
 
 		\begin{figure}[H]
 		  \centering
@@ -259,15 +279,24 @@ Vid en vanlig uppspelning använder sig ljudmodulen av en 4-bitars adress komman
 	Multiplexern (MUX) används för att välja mellan vilken av de två sensorerna som styrenheten vill kommunicera med.
 
 	\subsubsection{Räknare}
+	
+	Internt använder temperaturmodulen ett antal räknare för att generera de nödvändiga timingpulserna och generera korrekta läs- och skrivluckor. Se tabell~\ref{tab:cntTabell}.
 
-	Internt använder temperaturmodulen ett antal olika räknare: \\
-		\begin{tabular}{l c r}
-			\\{\bf Namn} & {\bf Bitar} & {\bf Beskrivning}\\
+	\begin{table} [H]
+		
+		\caption{Interna räknare, temperaturmodul} 
+		\label{tab:cntTabell}
+	\begin{tabular}{l l l}
+		
+		{\bf Räknare}
+		\\{Namn} & {Bitar} & {Beskrivning}\\
+		\hline
 			cntInt & 9 & Genererar timing-pulser\\
 			ZC & 4 & Hanterar timing för skriv-luckor\\
 			Progress & 2 & Anger aktuellt kommando (0-3)\\
 			bitCnt & 8 & Anger aktuell bit för överföring/läsning\\\\
-		\end{tabular}
+	\end{tabular}
+	\end{table}
 
 	Se även VHDL-beskrivning i appendix~\ref{sec:programlistningar}
 
@@ -289,12 +318,16 @@ vilket indikerar giltig data på knappsatsdatabussen, kData[3..0]. Genom att ski
 styrenheten att den sett och mottagit datan från knappsatsen.
 
 \section{Hårdvara}
+
+Nedan presenteras hårdvaran som systemet är uppbyggt av, under respektive rubrik. Se även komponentlista i Appendix~\ref{tab:komponentlista},
+samt kretsschema i Appendix~\ref{fig:schema}.
+
 \label{hårdvara}
 	\subsection{ISD2560P}
-ISD2560P är en integrerad inspelnings- och uppspelningskrets med plats för 60 sekunder ljud. Kretsen är inkopplad enligt ett modifierat förslagsschema i databladet och brukas i sk. Direct Addressing Mode. Kretsen har 10 adresspinnar med 600 giltiga adresser. Varje adressinkrementering flyttar uppspelningspekaren med 0.1 sekunder ($0.1 sekunder * 600 adresser$ $= 60 sekunder$). Signalerna {\it ce} (Chip Enable), {\it eom} (End of Message) och en 6-bitars adressbuss är anslutna till CPLDn. Uppspelningen styrs av den flanktriggade Chip Enable-signalen som är aktiv låg. När denna får en puls latchas adressvärdena och en uppspelning påbörjas. Uppspelning avslutas med en annan (aktiv låg) puls på {\it eom}.
+ISD2560P är en integrerad inspelnings- och uppspelningskrets från Futurlec, med plats för 60 sekunder ljud. Kretsen är inkopplad enligt ett modifierat förslagsschema i databladet och brukas i Direct Addressing Mode. Kretsen har 10 adresspinnar med 600 giltiga adresser. Varje adressinkrementering flyttar uppspelningspekaren med 0.1 sekunder ($0.1 $ sekunder $* 600$ adresser $= 60$ sekunder). Signalerna ce (Chip Enable), eom (End of Message) och en 6-bitars adressbuss är anslutna till CPLDn. Uppspelningen styrs av den flanktriggade Chip Enable-signalen som är aktiv låg. När denna får en puls latchas adressvärdena och en uppspelning påbörjas. Uppspelning avslutas med en annan (aktiv låg) puls på eom.
 
 De 3 minst signifikanta adressbitarna och den mest signifikanta adressbiten är knutna till jord. Resterande 6 bitar styrs av CPLDn. Inkoppling på detta vis innebär ljudklippslängder i multiplar av 0.8 sekunder. Alla siffror som läses upp ryms i enskilda 0.8 sekundersblock och kan således adresseras utan vidare. Längre ljudklipp kräver aldrig mer än 1.6 sekunder och kan tilldelas block av dubbel längd genom att använda 5-bitarsadressering med en statisk LSB.
-	Se även datablad: \url{http://www.futurlec.com/Others/ISD2560P.shtml}
+	Se även datablad i Appendix~\ref{sec:datablad}
 
 	\subsection{DS18S20}
 	\label{DS18S20}
@@ -304,26 +337,42 @@ De 3 minst signifikanta adressbitarna och den mest signifikanta adressbiten är 
 		och läs-luckor. Mellan varje skriv- eller läslucka finns en kort återhämtningsperiod. Temperatursensorn initieras genom att mastern
 		driver bussen låg, vilket följs av att temperatursensorkretsen driver för att signalera närvaro.
 		Efter initieringen väntar sensorkretsen på ett ROM-kommando från mastern,
-		följt av ett Funktions-kommando. Varje sådant kommando är en byte lång, och skickas som LSB-först. Mastern skickar
+		följt av ett Funktions-kommando. Varje sådant kommando är en byte långt och skickas som LSB-först. Mastern skickar
 		en logisk nolla genom att driva bussen låg under hela skrivluckan. En etta skickas genom att mastern driver bussen låg
 		under en kort del av skrivluckan och sedan släpper bussen under resten av skrivluckans längd. 
 
 		Då mastern är klar med att skicka över ROM- och Funktions-kommando, kan (beroende på vilka kommandon som sändes) DS18S20-kretsen
 		svara med aktuell data. På samma sätt som ovan måste mastern här initiera en läs-lucka. 
 		DS18S20-kretsen svarar på den allokerade läs-luckan och överför etta eller nolla. Mastern kan då sampla bussen för att läsa av vad DS18S20-kretsen skickat. All data som skickas från
-		temperatursensorn skickas som LSB-först och i 2-komplementsform. För exakta tidskrav, se datablad:
-		\url{http://datasheets.maxim-ic.com/en/ds/DS18S20.pdf}
+		temperatursensorn skickas som LSB-först och i 2-komplementsform. För exakta tidskrav, se datablad i Appendix~\ref{sec:datablad}
+		
 
 	\subsection{MT8880C}
 	\label{MT8880C}
 		Avkodning av uppringandes DTMF-signaler avkodas med hjälp av MT8880C från Mitel. 
 		Telefonsignalen kopplas direkt in till DTMF-överföraren enligt specifikation för standarsuppkoppling i datablad. Endast avkodningsfunktionen på 		kretsen används. Databuss, R/W-signal, IRQ och $\Phi$2 är anslutna till kontrollenheten. 
 		CS (Chip Select) är satt konstant låg då denna krets använder bussen exklusivt. 
-Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms efter spänningspåslag. Detaljer om initieringscykeln finns i databladet för MT8880C: \url{http://www.cse.chalmers.se/edu/year/2010/course/EDA234/datablad/mt8880.pdf}
+Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms efter spänningspåslag. Detaljer om initieringscykeln finns i databladet för MT8880C, se Appendix~\ref{sec:datablad}.
 
 \section{Tillståndsmaskiner}
-\label{sec:Tillstandsmaskiner}		
+
+	Nedan beskrivs modulernas tillståndsmaskiner. Varje tillståndsmaskin presenteras
+	som en lista över tillstånd med förklaringar, samt som ett grafiskt tillståndsdiagram.
+	Diagrammen är uppbyggda enligt principen som visas i figur~\ref{fig:SMExp}\\
+	
+	\begin{figure}[H]
+	  \centering
+	      \includegraphics[scale=0.5, angle=0]{StateMachineExplained.png}		
+	  	\caption{Förklaring till tillståndsdiagram}	
+		\label{fig:SMExp}
+	\end{figure}
+	
+\label{sec:Tillstandsmaskiner}	
+
+\pagebreak
+	
 \subsection{Styrenhet}
+
 			Se figur ~\ref{fig:CUSM}\\
 			{\bf Reset:} Alla signaler återställs till sina grundvärden.\\
 			{\bf Grundvärden:} Utgångspunkten är att alla signaler behåller sina gamla värden om inget annat anges.\\
@@ -352,9 +401,11 @@ Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms ef
 	  	\caption{State machine-diagram för styrenhet}
 		\label{fig:CUSM}
 	\end{figure}
+	
+	\pagebreak
 
 		\subsection{Temperaturmodul}
-			Se figur ~\ref{fig:TempSM} och förklaring i figur~\ref{fig:SMExp}\\
+			Se figur ~\ref{fig:TempSM}.\\
 			{\bf Reset:} Alla signaler och räknare återställs till sina grundvärden.\\
 			{\bf Grundvärden:} Utgångspunkten är att alla signaler behåller sina gamla värden om inget annat anges.\\
 			\begin{tabular}{l}
@@ -382,17 +433,12 @@ Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms ef
 
 	\begin{figure}[H]
 	  \centering
-	      \includegraphics[scale=0.5, angle=0]{StateMachineExplained.png}		
-	  	\caption{Förklaring till state machine-diagram}	
-		\label{fig:SMExp}
-	\end{figure}
-
-	\begin{figure}[H]
-	  \centering
 	      \includegraphics[scale=0.4, angle=0]{TempStateMachineDiagram.png}
 	  	\caption{Detaljerat state machine-diagram för temperaturläscykel}
 		\label{fig:TempSM}
 	\end{figure}
+	
+\pagebreak
 
 		\subsection{DTMF-Modul}
 
@@ -423,6 +469,8 @@ Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms ef
 	  	\caption{Förenklat state machine-diagram för DTMF-Modul}
 		\label{fig:DTMFSM}
 	\end{figure}
+	
+\pagebreak
 
 		\subsection{Ljudmodul}
 
@@ -456,6 +504,7 @@ Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms ef
 		\label{fig:SoundSM}
 	\end{figure}
 
+\pagebreak
 
 \section{Felanalys}
 
@@ -463,7 +512,7 @@ Då systemet hanterar avläsning av temperaturer och endast klarar ett begränsa
 görs här en felanalys. För de tillämpningsområden systemet är konstruerat för (hemanvändare) 
 är mätfelen dock för små för att ha betydelse.
 
-Temperatursensorerna arbetar med en temperaturupplösning på $0.5\,^{\circ}\mathrm{C}$, exaktheten på $\pm 0.5\,^{\circ}\mathrm{C}$ gäller i intervallet $-10\,^{\circ}\mathrm{C}$ till $+85\,^{\circ}\mathrm{C}$.
+Temperatursensorerna arbetar med en temperaturupplösning på $0,5\,^{\circ}\mathrm{C}$, exaktheten på $\pm 0,5\,^{\circ}\mathrm{C}$ gäller i intervallet $-10\,^{\circ}\mathrm{C}$ till $+85\,^{\circ}\mathrm{C}$. Resultatet som presenteras på LED-displayen är hela det avlästa värdet i binär form, medan ljuduppspelningen inte presenterar mer än en grads upplösning,
 Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt utanför intervallet representeras som maxtemperaturen.
 
 \pagebreak
@@ -479,8 +528,9 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 	\label{sec:Manual}
 	För att använda systemet, koppla in det till en spänningskälla ($+5V$) och till en telefonlinje.
 	När systemet är startat ska det startas om (Röd tryckknapp) och sedan initieras (Svart tryckknapp).
-	Efter detta är systemet redo att användas, och kommandon kan ges via telefon eller manuell knappsats.
-	När som helst kan systemet startas om helt genom att igen trycka på den röda tryckknappen.
+	Efter detta är systemet redo att användas, och kommandon kan ges via telefon eller manuell knappsats, se figur~\ref{fig:UserInterface}.
+	När som helst kan systemet startas om helt genom att igen trycka på den röda tryckknappen. Det finns även en binär switch för
+	att slå till eller från kontinuerlig avläsning av temperatur.
 	Då systemet blir uppringt läses temperaturen upp, sedan kan kommandon ges från användaren enligt nedan:\\
 
 	\begin{table}[ht]
@@ -520,47 +570,86 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 		  \centering
 		      \includegraphics[scale=0.40, angle=0]{UserInterface.png}
 			\label{fig:UserInterface}
-		  	\caption{Knapplayout, Knappsats resp. Telefon}
+		  	\caption{Knapplayout, knappsats resp. telefon}
 		\end{figure}
 
 	\section{Blockschema}
+		\label{sec:BlockAppendix}
 		\begin{figure}[H]
 		  \centering
-		      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD1.png}
+		      \includegraphics[scale=0.36, angle=90]{BlockDiagramCPLD1.png}
 			\label{fig:BlockDiagram1}
 		  	\caption{Blockschema (CPLD1)}
 		\end{figure}
 
 		\begin{figure}[H]
 		  \centering
-		      \includegraphics[scale=0.48, angle=90]{BlockDiagramCPLD2.png}
+		      \includegraphics[scale=0.40, angle=90]{BlockDiagramCPLD2.png}
 			\label{fig:BlockDiagram2}
 		  	\caption{Blockschema (CPLD2)}
 		\end{figure}
-
+	
+		\begin{figure}[H]
+		  \centering
+		      \includegraphics[scale=0.30, angle=0]{Xilinx_CPLD1.png}
+			\label{fig:BlockDiagram2}
+		  	\caption{Internt blockschema, moduler (CPLD1)}
+		\end{figure}
+	
+		\begin{figure}[H]
+		  \centering
+		      \includegraphics[scale=0.40, angle=0]{Xilinx_CPLD2.png}
+			\label{fig:BlockDiagram2}
+		  	\caption{Internt blockschema, moduler (CPLD2)}
+		\end{figure}	
+	
 	\section{Komponentlista}
+	
+	\begin{table} [H]
+	\caption{Komponentlista, tabell} 
+	\label{tab:komponentlista}
+	\begin{tabular}{l l l}
+		
+		{\bf Komponenter}
+		\\{Part} & {Value} & {Device}\\
+		\hline
+C1-C5, C8 & 100n & capacitor \\
+C6 & 22u & capacitor \\
+C7 & 4u7 & capacitor \\
+LED1-LED13 & - & led \\
+Q1 & 3.579545MHz & crystal \\
+R1-R2, R19, R21 & 4k7 & resistor \\
+R3-R14, R22 & 1k5 & resistor \\
+R15 & 1k & resistor \\
+R16, R23 & 10k & resistor \\
+R17 & 470k & resistor \\
+R18 & 390k & resistor \\
+R20 & 5k1 & resistor \\
+R24 & 15k & resistor \\
+S1 & - & switch \\
+SP1 & - & speaker \\
+U1 & - & DS18S20 \\
+U2 & - & DS18S20 \\
+U3 & - & MT8880C \\
+U4 & - & ISD2560 
 
-		\begin{tabular}{l r}
-		   	Matningsspänning & +5V\\
-		   	Strömförbrukning & ~80mA\\
-		   	Temperaturmätspann & +/- 31.5 C\\
-			Temperaturupplösning & 0.5 C\\	
-		\end{tabular}
+	\end{tabular}
+	\end{table}
 
 	\section{Kretsschema}
 
 		\begin{figure}[H]
 		  \centering
-		      \includegraphics[scale=0.7, angle=0]{schema.png}
-			\label{fig:schema}
+		      \includegraphics[scale=0.65, angle=90]{schema.png}
 		  	\caption{Kretsschema}
+		  	\label{fig:schema}
 		\end{figure}
 
 	\section{Kretskortslayout}
 
 	\begin{figure}[H]
 	  \centering
-	      \includegraphics[scale=0.65, angle=0]{Layout.png}
+	      \includegraphics[scale=0.60, angle=0]{Layout.png}
 		\label{fig:layout}
 	  	\caption{Kretskortslayout}
 	\end{figure}
@@ -569,14 +658,19 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 
 		\begin{figure}[H]
 		  \centering
-		      \includegraphics[scale=0.5, angle=0]{TempTiming.png}
+		      \includegraphics[scale=0.38, angle=0]{TempTiming.png}
 			\label{fig:TempTiming}
 		  	\caption{Timingdiagram för Temperaturmodulen}
 		\end{figure}
 
 	\section{Signallista}
-	\begin{tabular}{l c c r}
-		\\{\bf Signal} & {\bf Från} & {\bf Till} & {\bf Beskr.}\\ \\
+	\begin{table} [H]
+	\label{tab:signalTabell}
+	\caption{Signallista, tabell} 
+	\begin{tabular}{l l l l}
+		{\bf Signaler}
+		\\{Signal} & {Från} & {Till} & {Beskr.}\\
+		\hline
 		clk & Extern & Allt & Global Klocksignal\\
 		rst & Extern & Allt & Global Resetsignal\\
 		buttons[3..0] & Knappsats & Knappsatsmodul & Indatavektor\\
@@ -616,18 +710,59 @@ Systemet arbetar med ett temperaturspann på $\pm 32\,^{\circ}\mathrm{C}$, allt 
 		ce & Ljudmodul & ISD2560P & Chip-Enable från ljudmodul\\
 		eom & IDS2560P & Ljudmodul & End-Of-Message från ISD2560P\\\\
 	\end{tabular}
+	\end{table}
 
 	\section{Arbetsfördelning}
+	\label{sec:arbetsSec}
+	\begin{table} [H]
+	\caption{Arbetsfördelning, tabell} 
+	\label{tab:arbetsTabell}
 
-	\begin{tabular}{l c r}
-		\\{\bf Namn} & {\bf Moduler / Ansvar} & {\bf Övrigt}\\
-		Fredrik Brosser 	& ?? 	& ??\\
-		Karl Buchka 		& ?? 	& ??\\
-		Andreas Henriksson 	& ?? 	& ??\\
-		Johan Wolgers 		& ??	& ??\\\\
-	\end{tabular}
+		\begin{tabular}{l l l}
+		{\bf Arbetsfördelning}
+		\\{Namn} \\ {\it Moduler / Ansvar} \\ {\it Övrigt}\\
+		\hline
+				{\it Fredrik Brosser}\\
+				 Temperaturmodul, DS18S20, Styrenhet, Funktioner/Knappsats\\
+				 Rapport, blockschema, tillståndsdiagram\\
+				{\it Karl Buchka}\\
+				 Ljudmodul, ISD2560P\\
+				 Rapport\\
+				{\it Andreas Henriksson}\\
+				 DTMF-modul, Ljudmodul, Temperaturmodul\\
+				 Rapport, kretsschema\\
+				{\it Johan Wolgers}\\
+				 DTMF-modul, MT8880C\\
+				 Rapport\\
+		\end{tabular}
+	\end{table}
+		
+	\section{Datablad}
+	
+	\label{sec:datablad}
+	
+	\begin{table} [H]
+	\caption{Datablad, tabell} 
+	\label{tab:databladsTabell}
+
+		\begin{tabular}{l l}
+		{\bf Datablad}
+		\\{Krets} & {Datablad}\\
+		\hline
+			DS18S20 	& {\small \url{http://datasheets.maxim-ic.com/en/ds/DS18S20.pdf}}\\
+			ISD2560P 	& {\small \url{http://www.futurlec.com/Others/ISD2560P.shtml}}\\
+			MT8880C 	& {\small \url{http://www.cse.chalmers.se/edu/year/2010/course/EDA234/datablad/mt8880.pdf}}\\
+		\end{tabular}
+	\end{table}
+
+\pagebreak
 
 	\section{Programlistningar}
 	\label{sec:programlistningar}	
-
+		\lstinputlisting{TemperatureModule.vhd}
+		\lstinputlisting{ControlUnit.vhd}
+		\lstinputlisting{DTMFModule.vhd}
+		\lstinputlisting{FunctionModule.vhd}
+		\lstinputlisting{KeyboardModule.vhd}
+		\lstinputlisting{SoundModule.vhd}
 \end{document}
