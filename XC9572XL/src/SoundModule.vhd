@@ -70,7 +70,7 @@ begin
 		when s1c =>
 			outAddr <= "10" & ctrlAddr;
 			nstate <= s2c;
-		when s2c =>
+		when s2c =>/home/fredrik/Projects/Sommarstugekoll/Documentation/TimingDiagrams/DTMFStateMachineDiagram.png
 			outAddr <= "10" & ctrlAddr;
 			ce <= '0';
 			if eom = '1' then

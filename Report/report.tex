@@ -170,7 +170,6 @@ Systemet är som tidigare nämnt uppdelat i sex funktionsenheter, som presentera
 			\label{fig:CUFlowChart}
 		\end{figure}
 
-
 	\subsubsection{Uppbyggnad}
 
 	Styrenheten är i sin tur modulärt uppbyggd, och har ett väl avgränsat interface mot varje annan delmodul, men fungerar samtidigt som en samordnare mellan de olika modulerna.	För en ingående grafisk beskrivning av den bakomliggande tillståndsmaskinen, se sektion~\ref{sec:Tillstandsmaskiner} ~\nameref{sec:Tillstandsmaskiner}.
@@ -426,6 +425,37 @@ Före initiering skickas manuellt en initieringspuls till kretsen minst 100ms ef
 	\end{figure}
 
 		\subsection{Ljudmodul}
+
+			Se figur ~\ref{fig:SoundSM}\\
+			{\bf Reset:} Alla signaler återställs till sina grundvärden.\\
+			{\bf Grundvärden:} Alla signaler låga, utom ce som är hög.\\
+			\begin{tabular}{l}
+				\\{\bf Viloläge (tillstånd S0):}\\
+				S0: Inväntar play-signal\\
+				{\bf Spela upp Ljud (C)}\\
+				S1C: Sätt adress\\
+				S2C: Spela upp ljud, vänta tills uppspelning är klar\\
+				S3C: Signalera uppspelning klar till styrenhet\\
+				{\bf Spela upp Temperatur}\\
+				S1T: Sätt adress\\
+				S1T: Spela upp temperatur, vänta tills uppspelning klar\\
+				{\bf Spela upp Temperatur (vid overflow)}\\
+				S1TO: Sätt adress\\
+				S1TO: Spela upp temperatur, vänta tills uppspelning klar\\
+				{\bf Spela upp Positiv/Negativ}\\
+				S3TP: Sätt adress (positiv temperatur)\\
+				S3TM: Sätt adress (negativ temperatur)\\
+				S4TP: Spela upp positiv, vänta tills klar\\
+				S3TM: Spela upp negativ, vänta tills klar\\
+			\end{tabular}
+
+	\begin{figure}[H]
+	  \centering
+	      \includegraphics[scale=0.4, angle=0]{SoundStateMachineDiagram.png}
+	  	\caption{State machine-diagram för ljudenhet}
+		\label{fig:SoundSM}
+	\end{figure}
+
 
 \section{Felanalys}
 
