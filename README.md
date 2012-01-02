@@ -2,28 +2,34 @@
 
 A remotely (by telephone) controlled domestic automation assistant.
 
-Features include temperature monitoring, activation of heating, as well as remote coffee making.
+The main function of the system is to inform the user of the current temperatures at the points of measurement, and also to give the user remote binary control (on/off) of a number of external functions. 
 
-The project is based around a CPLD and is mainly a VHDL/Digital Logic project, 
+These functions could be  for example heating systems, radiators, or lighting.
 
-although it also incorporates other interesting integrated circuits such as sensors.
+Information- and control data is exchanged via a standard analog telephone connection, POTS (Plain Old Telephone Service) using DTMF (Dual Tone, Multiple Frequency).
+
+The project is based around two CPLDs and is mainly a VHDL/Digital Logic project,  although it also incorporates other interesting integrated circuits such as sensors. The project is completed and ready to be used, but can be expanded for further functionality, such as extreme temperature alarm, better measuring resolution, outgoing calls or caller authentication.
 
 ### Features
 
-* Temperature Monitoring 
+* Temperature monitoring 
 
-* Activation of heating
+* Control of external functions, for example heating
 
-* Coffe Maker Control
+* Accessible via a standard telephone connection
+
+* Voice playback for information
 
 ### Components Used
-(note: list not necessarily complete)
 
-* X9572XL (CPLD)
+* Xilinx X9572XL (CPLD, 2x)
 
-* MT8880 (DTMF Transmitter/Receiver)
+* Mitel MT8880 (DTMF Transceiver)
 
-* ISD2560P (Sound circuit)
+* Futurlec ISD2560P (Sound Memory Circuit)
 
-* DS18S20 (Digital Thermometer)
+* Maxim DS18S20 (Digital Thermometer, 2x)
 
+### Report
+
+The project is described in a technical report, where one can also find circuit diagrams, PCB layout and complete BOM list.

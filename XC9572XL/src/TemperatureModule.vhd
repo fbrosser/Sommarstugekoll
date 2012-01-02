@@ -2,30 +2,29 @@
 -- Temperature Module
 -- DS18S20 1-Wire Communication
 -- Fredrik Brosser
--- EDA234, Group 2
 --
 -- FILE
--- tempModule.vhd
--- Last Updated: 2011-12-10
+-- TemperatureModule.vhd
+-- Last Updated: 2011-12-30
 --
 -- VERSION
 -- Hardware ("production") v1.4
 --
 -- HARDWARE
 -- Target Device: XC9572XL
--- I/O Pins Used:
--- Macrocells Used:
--- Product Terms Used:
+-- I/O Pins Used: 8
+-- Macrocells Used: 22
+-- Product Terms Used: 42
 --
 -- DESCRIPTION
 -- Temperature module connected to two DS18S20 temperature sensors
 -- communicating via a 1-wire serial protocol. 
--- Module has to be reset, then the control unit can request a (by setting tRd high)
--- temperature read/conversion from the selected temperature sensor
--- (tSel = 0 or 1 for sensor 0 and 1, respectively). When there is 
+-- Module has to be reset, then the control unit can request (by setting tRd high)
+-- a temperature read/conversion from the selected temperature sensor
+-- (tSel = 0 or 1 for sensor 0 or 1, respectively). When there is 
 -- valid data on the bus (conversion and read cycle finished), the 
 -- temperature module responds by setting tAv (temperature Available) high.
--- The temperature can the be read from the bus (temp[7..0]).
+-- The temperature can then be read from the data bus (temp[7..0]).
 --
 ----------------------------------------------------------------------------------
 
@@ -35,24 +34,25 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 
 Entity temperatureModule is
-	port(	 	-- Global clock
-				clk	  	:	in		std_logic;
-				-- Global reset (Internal)
-			   rstInt	:	in		std_logic;
-				-- Temperature Read, trigger signal from Control Unit
-			   tRd	 	:	in		std_logic;
-				-- Signal to MUX, for selecting active sensor (0/1 for dq0/dq1, resp.)
-				tSel		:	in		std_logic;
+	port(	 
+		-- Global clock
+		clk 	:	in 	std_logic;
+		-- Global reset (Internal)
+		rstInt	:	in	std_logic;
+		-- Temperature Read, trigger signal from Control Unit
+		tRd 	:	in	std_logic;
+		-- Signal to MUX, for selecting active sensor (0/1 for dq0/dq1, resp.)
+		tSel	:	in	std_logic;
+						
+		-- Temperature Available, indicates valid data on temperature output bus
+		tAv	: 	out	std_logic;
+		-- Internal temperature data output
+		temp	:	out	std_logic_vector (7 downto 0);
 				
-				-- Temperature Available, indicates valid data on temperature output bus
-				tAv		: 	out	std_logic;
-				-- Internal temperature data output
-				temp		:	out	std_logic_vector(7 downto 0);
-				
-				-- Output to 1-Wire bus 1 (temperature sensor 0)
-			   dq0     	: 	inout std_logic;
-				-- Output to 1-Wire bus 0 (temperature sensor 1)
-			   dq1     	: 	inout std_logic
+		-- Output to 1-Wire bus 1 (temperature sensor 0)
+		dq0     	: 	inout 	std_logic;
+		-- Output to 1-Wire bus 0 (temperature sensor 1)
+		dq1     	: 	inout 	std_logic
 	);
 end temperatureModule;
 
@@ -61,7 +61,7 @@ Architecture Behavioral of temperatureModule is
 	-- Internal signal declarations
 	
 	-- Buffer Enable
-	signal E 					: std_logic;
+	signal E 				: std_logic;
 	signal nextE				: std_logic;
 	
 	-- Valid data on temperature bus
@@ -73,51 +73,51 @@ Architecture Behavioral of temperatureModule is
 	signal nextState 		 	: integer range 0 to 15;
 	
 	-- Data to be sent on bus
-	signal data					: std_logic_vector(7 downto 0);
+	signal data				: std_logic_vector(7 downto 0);
 	signal nextData			: std_logic_vector(7 downto 0);
 	
 	-- Internal temperature data output
-	signal tempOut				: std_logic_vector(7 downto 0);
-	signal nexttempOut		: std_logic_vector(7 downto 0);
+	signal tempOut			: std_logic_vector(7 downto 0);
+	signal nexttempOut			: std_logic_vector(7 downto 0);
 	
 	-- Reading sign bit from sensor
 	signal signBit				: std_logic;
-	signal nextSignBit		: std_logic;
+	signal nextSignBit			: std_logic;
 	
 	-- Sampling of bus by master
 	signal sample				: std_logic;
 	signal nextSample			: std_logic;
 	
-	-- Counter used when sending a logical 0 on bus ('Zero Counter')
-	signal ZC					: std_logic_vector(3 downto 0);
-	signal nextZC  			: std_logic_vector(3 downto 0);
+	-- Counter used when sending a logical 0 on bus ( ' Zero Counter ' )
+	signal ZC				: std_logic_vector(3 downto 0);
+	signal nextZC  				: std_logic_vector(3 downto 0);
 	
 	-- Signal for keeping track of our progress through the read-cycle 
 	signal progress  			: std_logic_vector(1 downto 0);
-	signal nextProgress  	: std_logic_vector(1 downto 0);
+	signal nextProgress  			: std_logic_vector(1 downto 0);
 	
 	-- Counter for keeping track of which bit we are currently transmitting or sampling
 	signal bitCnt				: std_logic_vector(2 downto 0);
 	signal nextBitCnt			: std_logic_vector(2 downto 0);
 
 	-- Internal counter used to create timing pulses
-	signal cntInt    			: std_logic_vector(8 downto 0);
-	signal nextCntInt    	: std_logic_vector(8 downto 0);
+	signal cntInt    				: std_logic_vector(8 downto 0);
+	signal nextCntInt    			: std_logic_vector(8 downto 0);
 	
 	-- Timing pulses, 512, 256, 8 and 4 us, respectively
-	signal delayLong      	: std_logic;
-	signal delayMedium	 	: std_logic;
-	signal delayShort       : std_logic;
+	signal delayLong      			: std_logic;
+	signal delayMedium	 		: std_logic;
+	signal delayShort     			: std_logic;
 	signal delayTiny			: std_logic;
 	
 	-- Constants related to timing
-	constant LongDelayConstant 	: std_logic_vector := "111111110";
+	constant LongDelayConstant 		: std_logic_vector := "111111110";
 	constant MediumDelayConstant 	: std_logic_vector := "11111111";
-	constant ShortDelayConstant 	: std_logic_vector := "111";
-	constant TinyDelayConstant 	: std_logic_vector := "11";
+	constant ShortDelayConstant 		: std_logic_vector := "111";
+	constant TinyDelayConstant 		: std_logic_vector := "11";
   	
 	-- Base value (reset) for ZC
-	constant ZCrst 					: std_logic_vector := "1010";
+	constant ZCrst 				: std_logic_vector := "1010";
 
 	-- Begin architecture
 	begin
@@ -138,30 +138,30 @@ Architecture Behavioral of temperatureModule is
 	SyncP : process(clk, rstInt)
 	begin
 		if(not(rstInt) = '1') then 
-			state 	<= 0;
-			cntInt 	<= (others => '0');
-			progress <= (others => '0');
-			bitCnt 	<= (others => '1');
+			state 		<= 0;
+			cntInt 		<= (others => '0');
+			progress 	<= (others => '0');
+			bitCnt 		<= (others => '1');
 			data 		<= (others => '1');
 			tempOut 	<= (others => '1');
 			ZC 		<= ZCrst; 
 			sample 	<= '1';
-			E 			<= '0';
-			signBit 	<= '0';
-			tAvInt	<= '0';
+			E 		<= '0';
+			signBit 		<= '0';
+			tAvInt		<= '0';
 		elsif(clk'Event and clk = '1') then
-			state 	<= nextState;
-			ZC 		<= nextZC;
-			E 			<= nextE;
 			-- Increment internal counter
-			cntInt 	<= nextCntInt;
-			progress <= nextProgress;
-			bitCnt 	<= nextBitCnt;
+			cntInt 		<= nextCntInt;
+			state 		<= nextState;
+			ZC 		<= nextZC;
+			E 		<= nextE;
+			progress 	<= nextProgress;
+			bitCnt 		<= nextBitCnt;
 			data 		<= nextData;
 			sample 	<= nextSample;
 			tempOut 	<= nexttempOut;
-			signBit 	<= nextSignBit;
-			tAvInt 	<= nexttAvInt;
+			signBit 		<= nextSignBit;
+			tAvInt 		<= nexttAvInt;
 		end if;
 	end process;
 	
@@ -203,9 +203,9 @@ Architecture Behavioral of temperatureModule is
 		end if;
 		-- Gives pulses every 8 us
 		if(cntInt(2 downto 0) = ShortDelayConstant) then
-		  delayShort <= '1';
+			delayShort <= '1';
 		else
-		  delayShort <= '0';
+			delayShort <= '0';
 		end if;    
 		-- Gives pulses every 256 us
 		if(cntInt(7 downto 0) = MediumDelayConstant) then
@@ -237,14 +237,14 @@ Architecture Behavioral of temperatureModule is
 	
 		-- Defaults
 		nextState 		<= state;
-		nextProgress 	<= progress;
+		nextProgress 		<= progress;
 		nextBitCnt 		<= bitCnt;
 		nextZC 			<= ZC;
 		nextSample 		<= sample;
 		nextData 		<= data;
 		nextE 			<= E;
-		nexttempOut 	<= tempOut;
-		nextSignBit 	<= signBit;
+		nexttempOut 		<= tempOut;
+		nextSignBit 		<= signBit;
 		nexttAvInt 		<= tAvInt;
 		
 		case state is
@@ -258,11 +258,11 @@ Architecture Behavioral of temperatureModule is
 			  nextZC <= ZCrst;
 			  nextSignBit 	<= '0';
 			  nextE 	<= '0';
-		    -- Wait for trigger from control unit
+		   	 -- Wait for trigger from control unit
 				if(tRd = '1') then
-				  nextState  <= state + 1;
-				  -- Entering the read cycle - data no longer valid
-				  nexttAvInt <= '0';
+					nextState  <= state + 1;
+				 	 -- Entering the read cycle - data no longer valid
+				  	nexttAvInt <= '0';
 				end if;
 			when 1 =>
 				-- Enable output and send logical 0
@@ -287,15 +287,15 @@ Architecture Behavioral of temperatureModule is
 ----------------------------------------------------------------------------------		  
 -- SEND
 ----------------------------------------------------------------------------------  
-      -- Prepare for transmit of the byte in data
-		  when 4 =>
-			  -- Release bus and delay
-		     nextE <= '0';
-			  if(delayShort = '1') then
+      			-- Prepare for transmit of the byte in data
+		 	when 4 =>
+			  	-- Release bus and delay
+		    		nextE <= '0';
+			 	 if(delayShort = '1') then
 					nextState <= 5;
-			  end if;		  
-		  -- Send logical 0 or 1 by driving bus low for a certain number of shortDelay periods (1 for 1's, ZCrst for 0's)
-		  when 5 =>
+			  	end if;		  
+		  	-- Send logical 0 or 1 by driving bus low for a certain number of shortDelay periods (1 for 1's, ZCrst for 0's)
+		 	 when 5 =>
 				-- Send logical 1
 				if(data(7-conv_integer(bitCnt)) = '1' and delayShort = '1') then
 					nextE <= '0';
@@ -355,34 +355,33 @@ Architecture Behavioral of temperatureModule is
 				nextE <= '0';
 			  	-- Increase progress variable. NB: assignment at end of process, will compare with 'old' value!
 				nextProgress <= progress + 1;
-			   case progress is
-			      when "00" =>
-			         -- Issue Convert T Command (44h)
-			         nextData 		<= X"44";
-			         nextState 		<= 4;
-			      when "01" =>
-			         -- Do reset and Skip ROM (CCh)
-						nextData 		<= X"CC";
-						nextState 		<= 1;
-			      when "10" =>
-			         -- Issue Read Scratchpad Command (BEh)
-			         nextData 		<= X"BE";
-			         nextState 		<= 4;
-			      when "11" =>
-			         -- Master goes into Rx mode
-			         nextState 	 	<= state + 1;
-						nextProgress 	<= "11";
-			      when others =>
-			         -- We should not be here, something is terribly wrong: do full reset and start over
-			         nextProgress 	<= "00";
-			         nextState 		<= 0;
+				case progress is
+				      when "00" =>
+				         -- Issue Convert T Command (44h)
+				       	nextData 		<= X"44";
+				        	nextState 		<= 4;
+				      when "01" =>
+				         -- Do reset and Skip ROM (CCh)
+					nextData 		<= X"CC";
+					nextState 		<= 1;
+				      when "10" =>
+				         -- Issue Read Scratchpad Command (BEh)
+				         nextData 		<= X"BE";
+				         nextState 		<= 4;
+				      when "11" =>
+				         -- Master goes into Rx mode
+				         nextState 	 	<= state + 1;
+							nextProgress 	<= "11";
+				      when others =>
+				         -- We should not be here, something is terribly wrong: do full reset and start over
+				         nextProgress 	<= "00";
+				         nextState 		<= 0;
 			   end case;
 				
 ----------------------------------------------------------------------------------		  
 -- READ
 ----------------------------------------------------------------------------------		  
 ----------------------------------------------------------------------------------		  
---
 -- Master reads 9 bytes from the bus, starting with LSB of Byte 0
 -- However, we are only interested in the temperature registers (Byte 0 and 1),
 -- so a reset pulse is given after nine bits (8 temp + 1 sign) have been read,
@@ -467,7 +466,7 @@ Architecture Behavioral of temperatureModule is
 				end if;
 			
 			when 15 =>
-				-- Data on TOut bus is now valid. Go back and wait for next trigger.
+				-- Data on TOut bus is now valid. Go back and wait for next trigger
 				nexttAvInt 	<= '1';
 				nextE 		<= '0';
 				nextState 	<= 0;
@@ -480,4 +479,3 @@ Architecture Behavioral of temperatureModule is
 		end case;	
 	end process;
 end Behavioral;
-
